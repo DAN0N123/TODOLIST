@@ -3,7 +3,7 @@ const path = require('path');
 const createUser = require('./database-operations');
 
 const app = express();
-const PORT = 3000;
+const PORT = 8081;
 
 // Serve static files from the frontend/dist directory
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
