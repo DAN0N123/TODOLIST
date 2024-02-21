@@ -1,3 +1,4 @@
+import { updateDisplayForUser } from "../frontend/src/DOM_manipulation";
 export async function handleUserCreation() {
     const userForm = document.getElementById('userForm');
 
@@ -31,8 +32,8 @@ export async function handleUserCreation() {
             // Handle error - show error message to the user, retry, etc.
         }
     });
-    // const main_container = document.querySelector('.main');
-    // main_container.innerHTML = ''
+    const main_container = document.querySelector('.main');
+    main_container.innerHTML = ''
 }
 
 export async function handleLoginFormSubmit(event) {
@@ -52,9 +53,7 @@ export async function handleLoginFormSubmit(event) {
       });
   
       if (response.ok) {
-        // const username_p = document.querySelector('.username');
-        // username_p.textContent = 'test';
-        console.log('okay yo')
+        updateDisplayForUser(document.getElementById('inputUsername').value)
       } else {
         const errorMessage = await response.json();
         console.error('Login failed:', errorMessage.error);

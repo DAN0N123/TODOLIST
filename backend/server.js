@@ -26,13 +26,20 @@ app.use(session({
     saveUninitialized: false
 }));
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 
 // Serve static files from the 'dist' directory
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-// Define API endpoints
+
+app.get('/', function(req, res) {
+  if (req.session.username) {
+    res.send(/* HTML for authenticated user */);
+  } else {
+    res.send(/* HTML for non-authenticated user */);
+  }
+});
+
 app.post('/createUser', async (req, res) => {
   try {
     const userData = req.body;
@@ -41,6 +48,25 @@ app.post('/createUser', async (req, res) => {
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/logout', function(req, res) {
+  req.session.destroy(function(err) {
+    if (err) {
+      console.error('Error destroying session:', err);
+      res.status(500).json({ error: 'An error occurred while logging out' });
+    } else {
+      res.status(200).json({ message: 'Logout successful' });
+    }
+  });
+});
+
+app.get('/check_authentication', function(req, res) {
+  if (req.session.username) {
+    res.status(200).json({ authenticated: true, username: req.session.username });
+  } else {
+    res.status(401).json({ authenticated: false });
   }
 });
 
@@ -85,7 +111,7 @@ async function createUser(userData) {
   }
 }
 
-app.post('/login', async (req, res) => {
+app.post('/login', async (req, res, next) => {
     const { username, password } = req.body;
   
     try {
@@ -98,29 +124,27 @@ app.post('/login', async (req, res) => {
   
       // Credentials are correct, create a session
       req.session.username = username;
-      res.status(200).json({ message: 'Login successful' });
-      
+      res.status(200).json({ message: 'Login successful'});
+      next()
     } catch (error) {
       console.error('Error logging in:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
   
-  function isAuthenticated(req, res, next) {
-    if (req.session.username) {
-      next();
-    } else {
-      res.status(401).json({ error: 'Unauthorized' });
-    }
-  }
+// function checkAuthentication(req, res, next) {
+//     if (req.session.username) {
+//       next();
+//     } else {
+//       res.status(401).json({ error: 'Unauthorized' });
+//     }
+//   }
 
 
 app.get('/current-user', (req, res) => {
     const username = req.session.username;
     res.json({ username });
   });
-
-
 
 // Start the server
 app.listen(PORT, () => {

@@ -4,6 +4,7 @@ module.exports = {
   watch: true,
   entry: './src/index.js',
   output: {
+    publicPath: '/',
     filename: 'bundle.js',
     path: path.resolve(__dirname, './dist'),
   },
@@ -44,8 +45,19 @@ module.exports = {
             presets: ['@babel/preset-env']
           }
         }
-      }
-    ]
+      },
+      {
+        test: /\.svg$/,
+        use:
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'images/', // Specify the output path for SVG files
+            }
+          }
+        }
+        ],
   },
   plugins: [
     // fix "process is not defined" error:

@@ -1,4 +1,8 @@
 import { handleUserCreation, handleLoginFormSubmit} from "../../backend/sendUserData";
+import { logoutUser } from "./misc";
+import add_task_svg from "./imgs/add_task.svg"
+import add_project_svg from "./imgs/add_project.svg"
+
 const yo = true;
 export default yo;
 // module.exports = createUserForm;
@@ -138,4 +142,63 @@ export function createLoginForm(){
         event.preventDefault();
         await handleLoginFormSubmit();
     });
+};
+
+export function updateDisplayForUser(username){
+    const userBox = document.querySelector('.userBox');
+    userBox.innerHTML = '';
+    const usernameDiv = document.createElement('div');
+    usernameDiv.classList.add('btn-group');
+    usernameDiv.classList.add('dropend');
+    const usernameButton = document.createElement('button');
+    usernameButton.classList.add('btn');
+    usernameButton.classList.add('btn-secondary');
+    usernameButton.classList.add('dropdown-toggle');
+    usernameButton.setAttribute('type', 'button');
+    usernameButton.setAttribute('data-bs-toggle', 'dropdown');
+    usernameButton.setAttribute('aria-expanded', 'false');
+    usernameButton.textContent = username;
+    const usernameDropdownUl = document.createElement('ul');
+    usernameDropdownUl.classList.add('dropdown-menu');
+    const logoutOptionLi = document.createElement('li');
+    const logoutButton = document.createElement('button');
+    logoutButton.textContent = 'Logout';
+    logoutButton.setAttribute('id', 'logoutButton');
+    logoutButton.addEventListener('click', logoutUser)
+    logoutOptionLi.appendChild(logoutButton);
+    usernameDropdownUl.appendChild(logoutOptionLi);
+    usernameDiv.appendChild(usernameButton);
+    usernameDiv.appendChild(usernameDropdownUl);
+    userBox.appendChild(usernameDiv);
+
+    const sidebar = document.querySelector('.sidebar');
+    const addTaskDiv = document.createElement('div');
+    const addTaskImg = document.createElement('img');
+    addTaskImg.src = add_task_svg;
+    const addProjectImg = document.createElement('img');
+    addProjectImg.src = add_project_svg;
+}
+
+export function setInitialUserBox(){
+    const userBox = document.querySelector('.userBox');
+    userBox.innerHTML = '';
+    
+
+    const login_button = document.createElement('button');
+    login_button.textContent = 'Login';
+    login_button.addEventListener('click', () => createLoginForm());
+    userBox.appendChild(login_button);
+
+
+    const noAccount = document.createElement('div');
+    noAccount.classList.add('noAccount');
+
+    const user_button = document.createElement('button');
+    user_button.textContent = 'Register';
+    user_button.addEventListener('click', () => createUserCreationForm());
+    const noAccountP = document.createElement('p');
+    noAccountP.textContent = "Don't have an account?";
+    noAccount.appendChild(noAccountP);
+    noAccount.appendChild(user_button)
+    userBox.appendChild(noAccount)
 };
