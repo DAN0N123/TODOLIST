@@ -2,7 +2,7 @@ import { handleUserCreation, handleLoginFormSubmit} from "../../backend/sendUser
 import { logoutUser } from "./misc";
 import add_task_svg from "./imgs/add_task.svg"
 import add_project_svg from "./imgs/add_project.svg"
-
+import defaultImgSrc from "./imgs/defaultImg.png"
 const yo = true;
 export default yo;
 // module.exports = createUserForm;
@@ -172,11 +172,87 @@ export function updateDisplayForUser(username){
     userBox.appendChild(usernameDiv);
 
     const sidebar = document.querySelector('.sidebar');
+
     const addTaskDiv = document.createElement('div');
-    const addTaskImg = document.createElement('img');
-    addTaskImg.src = add_task_svg;
-    const addProjectImg = document.createElement('img');
-    addProjectImg.src = add_project_svg;
+    addTaskDiv.classList.add('addStuffDiv')
+    const addTaskImg = document.createElement('div');
+    addTaskImg.classList.add('sidebarImg')
+    addTaskImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle" viewBox="0 0 16 16">'+
+    '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>'+
+    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>'+
+    '</svg>'
+    addTaskImg.addEventListener('mouseenter', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">'+
+    '<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>'+
+    '</svg>')
+    addTaskImg.addEventListener('mouseleave', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle" viewBox="0 0 16 16">'+
+    '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>'+
+    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>'+
+    '</svg>')
+    const addTaskText = document.createElement('div')
+    addTaskText.textContent = 'Add new task';
+    addTaskText.style.fontSize = '19px'
+    addTaskDiv.appendChild(addTaskText);
+    addTaskDiv.appendChild(addTaskImg);
+    
+    const addProjectDiv = document.createElement('div');
+    addProjectDiv.classList.add('addStuffDiv');
+    const addProjectImg = document.createElement('div');
+    addProjectImg.classList.add('sidebarImg');
+    addProjectImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square" viewBox="0 0 16 16">'+
+    '<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>'+
+    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
+    '</svg>'
+    addProjectImg.addEventListener('mouseenter', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square-fill" viewBox="0 0 16 16">'+
+    '<path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"/>'+
+    '</svg>' )
+    addProjectImg.addEventListener('mouseleave', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square" viewBox="0 0 16 16">'+
+    '<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>'+
+    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
+    '</svg>')
+    const addProjectText = document.createElement('div');
+    addProjectText.textContent = 'My Projects';
+    addProjectText.style.fontSize = '19px'
+    addProjectDiv.appendChild(addProjectText);
+    addProjectDiv.appendChild(addProjectImg);
+    addProjectDiv.style.marginTop = '15%'
+
+    const usersSidebar = document.createElement('div');
+    usersSidebar.classList.add('usersSidebar');
+    usersSidebar.appendChild(addProjectDiv);
+    usersSidebar.appendChild(addTaskDiv);
+    userBox.appendChild(usersSidebar);
+
+    const main_container = document.querySelector('.main');
+
+    
+    
+    const mainToday = document.createElement('div');
+    mainToday.classList.add('mainToday');
+    const mainTodayText = document.createElement('div');
+    mainTodayText.textContent = 'Today';
+    mainTodayText.style.cssText = "font-size: 25px; font-weight: 700;"
+    // const mainTodayAddTask = document.createElement('div');
+    // const mainTodayAddTaskButton = document.createElement('button');
+    
+    mainToday.appendChild(mainTodayText);
+    main_container.appendChild(mainToday);
+    if (mainToday.childElementCount < 3){
+        const defaultDiv = document.createElement('div');
+        defaultDiv.style.position = 'absolute';
+
+        defaultDiv.style.cssText = "display: flex; flex-direction: column; align-items:center; position: absolute; left: 0; right: 0; top: 0; bottom: 30%; margin: auto; width:400px; height: 200px;"
+        const defaultImg = document.createElement('img');
+        defaultImg.src = defaultImgSrc;
+        defaultImg.style.width = '294px';
+        const defaultP = document.createElement('p');
+        defaultP.innerHTML = 'What do you have to do today?</br> Tasks added here will be automatically marked due until today'
+        defaultP.style.marginLeft = '5%'
+        defaultDiv.appendChild(defaultImg);
+        defaultDiv.appendChild(defaultP);
+        main_container.appendChild(defaultDiv);
+    }
+    
+
 }
 
 export function setInitialUserBox(){

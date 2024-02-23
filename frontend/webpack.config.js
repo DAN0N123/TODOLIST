@@ -53,11 +53,23 @@ module.exports = {
             loader: 'file-loader',
             options: {
               name: '[name].[ext]',
-              outputPath: 'images/', // Specify the output path for SVG files
+              outputPath: 'imgs/',
             }
           }
-        }
+        },
+      {
+        test: /\.png$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'imgs/', // Specify the output path for PNG files
+            },
+          },
         ],
+      },
+    ]
   },
   plugins: [
     // fix "process is not defined" error:
