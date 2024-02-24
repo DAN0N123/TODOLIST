@@ -1,0 +1,33 @@
+/* Applied to the drop down list by default to hide it and
+   removed when the list needs to be shown. */
+   .hidden {
+    display:none;
+   }
+   
+   #container {
+     display:inline-block;
+     vertical-align:top;
+   }
+   
+   /* Ensures that the input will be positioned at the top-left of its parent */
+   #selectedBrowser {
+     position:absolute;
+   }
+   
+   #list {
+     position:absolute; /* Position at top-left of parent */
+     top:1.85em;  /* But, then move down to be below the input */
+     border:1px solid #e0e0e0; 
+     height:5em;  /* Limit height of list */
+     overflow-y:scroll; /* Add vertical scroll bar when list won't fit in height */
+   }
+   
+   #list > div {
+     cursor:pointer;
+     user-select:none;
+     margin:2px 0;
+   }
+   
+   .highlight {
+     background-color:rgba(255, 255, 0, .5);
+   }

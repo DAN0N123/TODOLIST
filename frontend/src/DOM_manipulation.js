@@ -170,24 +170,26 @@ export function updateDisplayForUser(username){
     usernameDiv.appendChild(usernameButton);
     usernameDiv.appendChild(usernameDropdownUl);
     userBox.appendChild(usernameDiv);
+    userBox.style.marginBottom = '40%'
 
     const sidebar = document.querySelector('.sidebar');
 
     const addTaskDiv = document.createElement('div');
     addTaskDiv.classList.add('addStuffDiv')
-    const addTaskImg = document.createElement('div');
-    addTaskImg.classList.add('sidebarImg')
-    addTaskImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle" viewBox="0 0 16 16">'+
-    '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>'+
-    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>'+
-    '</svg>'
-    addTaskImg.addEventListener('mouseenter', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">'+
-    '<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>'+
-    '</svg>')
-    addTaskImg.addEventListener('mouseleave', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle" viewBox="0 0 16 16">'+
-    '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>'+
-    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>'+
-    '</svg>')
+    const addTaskImg = document.createElement('img');
+    addTaskImg.classList.add('taskSidebarImg');
+    addTaskImg.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle" viewBox="0 0 16 16">' +
+        '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>' +
+        '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
+        '</svg>');
+
+    addTaskImg.addEventListener('mouseenter', (event) => {
+        event.currentTarget.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">' +
+            '<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>' +
+            '</svg>');
+    });
+    
+
     const addTaskText = document.createElement('div')
     addTaskText.textContent = 'Add new task';
     addTaskText.style.fontSize = '19px'
@@ -196,19 +198,18 @@ export function updateDisplayForUser(username){
     
     const addProjectDiv = document.createElement('div');
     addProjectDiv.classList.add('addStuffDiv');
-    const addProjectImg = document.createElement('div');
-    addProjectImg.classList.add('sidebarImg');
-    addProjectImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square" viewBox="0 0 16 16">'+
-    '<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>'+
-    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
-    '</svg>'
-    addProjectImg.addEventListener('mouseenter', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square-fill" viewBox="0 0 16 16">'+
-    '<path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"/>'+
-    '</svg>' )
-    addProjectImg.addEventListener('mouseleave', (event) => event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square" viewBox="0 0 16 16">'+
-    '<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>'+
-    '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
-    '</svg>')
+    const addProjectImg = document.createElement('img');
+    addProjectImg.classList.add('projectSidebarImg');
+    addProjectImg.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square" viewBox="0 0 16 16">' +
+        '<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>' +
+        '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
+        '</svg>');
+
+    addProjectImg.addEventListener('mouseenter', (event) => {
+        event.currentTarget.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square-fill" viewBox="0 0 16 16">' +
+            '<path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"/>' +
+            '</svg>');
+    });
     const addProjectText = document.createElement('div');
     addProjectText.textContent = 'My Projects';
     addProjectText.style.fontSize = '19px'
@@ -222,6 +223,54 @@ export function updateDisplayForUser(username){
     usersSidebar.appendChild(addTaskDiv);
     userBox.appendChild(usersSidebar);
 
+    const taskDialog = document.createElement('dialog');
+    taskDialog.setAttribute('id', 'taskDialog');
+    taskDialog.innerHTML = '<form id="taskForm">'+
+    '<input type="text" id="taskName" name="taskName" required placeholder="Task name">'+
+    '<br>'+
+    '<label for="taskDescription">Description:</label>'+
+    '<textarea id="taskDescription" name="taskDescription"></textarea>'+
+    '<br>'+
+    '<button type="submit">Create</button>'+
+    '</form>'
+    
+    sidebar.appendChild(taskDialog);
+
+    sidebar.addEventListener('click', function(event) {
+        console.log(event.target.classList.contains('taskSidebarImg'))
+        if (event.target.classList.contains('taskSidebarImg')) {
+            console.log('yo');
+            const taskDialog = document.getElementById('taskDialog');
+            if (taskDialog) {
+                taskDialog.showModal();
+                const taskForm = document.getElementById('taskForm');
+                taskForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const taskName = document.getElementById('taskName').value;
+                    const taskDescription = document.getElementById('taskDescription').value;
+                    taskDialog.close();
+                });
+            }
+        }
+    });
+
+    sidebar.addEventListener('mouseover', function(event) {
+        const task = document.querySelector('.taskSidebarImg');
+        const project = document.querySelector('.projectSidebarImg');
+        if (task) {
+            task.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-circle" viewBox="0 0 16 16">' +
+                '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>' +
+                '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
+                '</svg>');
+        }
+        if (project) {
+            project.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#327FE9" class="bi bi-plus-square" viewBox="0 0 16 16">' +
+                '<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>' +
+                '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>' +
+                '</svg>');
+        }
+    });
+    
     const main_container = document.querySelector('.main');
 
     
@@ -245,7 +294,7 @@ export function updateDisplayForUser(username){
         defaultImg.src = defaultImgSrc;
         defaultImg.style.width = '294px';
         const defaultP = document.createElement('p');
-        defaultP.innerHTML = 'What do you have to do today?</br> Tasks added here will be automatically marked due until today'
+        defaultP.innerHTML = 'What do you have to do today?</br> Tasks added here will be automatically marked as due today'
         defaultP.style.marginLeft = '5%'
         defaultDiv.appendChild(defaultImg);
         defaultDiv.appendChild(defaultP);
