@@ -45,6 +45,8 @@ app.post('/createUser', async (req, res) => {
     const userData = req.body;
     const newUser = await createUser(userData);
     res.status(201).json(newUser);
+    
+    
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -92,24 +94,27 @@ async function isUsernameAvailable(username) {
 
 // Define createUser function
 async function createUser(userData) {
-  const { username, email, password } = userData;
+  const { username, email, password} = userData;
+  const tasks = {};
   const connection = await pool.getConnection();
+  console.log(`connection: ${connection}`)
 
   const usernameAvailable = await isUsernameAvailable(username);
   
   if (!usernameAvailable) {
     return console.log('Username already taken')
-    connection.release(); // Release the connection back to the pool
   }
 
   try {
-    const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-    const [results] = await connection.execute(query, [username, email, password]);
+    const query = 'INSERT INTO users (username, email, password, tasks) VALUES (?, ?, ?, ?)';
+    const [results] = await connection.execute(query, [username, email, password, JSON.stringify(tasks)]);
     return { id: results.insertId, username, email, password }; // Return the newly created user
   } finally {
     connection.release(); // Release the connection back to the pool
   }
 }
+
+
 
 app.post('/login', async (req, res, next) => {
     const { username, password } = req.body;
@@ -139,6 +144,29 @@ app.post('/login', async (req, res, next) => {
 //       res.status(401).json({ error: 'Unauthorized' });
 //     }
 //   }
+
+app.post('/addTask', async (req, res, next) => {
+  console.log('yo add task endpoint')
+  const username = req.session.username;
+  const newTaskData = req.body;
+  const connection = await pool.getConnection();
+  const getUserQuery = 'SELECT tasks FROM users WHERE username = ?';
+  const [userData] = await connection.execute(getUserQuery, [username]);
+  const currentTasksJson = userData[0].tasks;
+  const currentTasks = JSON.parse(currentTasksJson);
+
+  currentTasks[newTaskData] = newTaskData;
+  const updatedTasksJson = JSON.stringify(currentTasks);
+
+  try {
+    const updateTasksQuery = 'UPDATE users SET tasks = ? WHERE username = ?';
+    await connection.execute(updateTasksQuery, [updatedTasksJson, username]);
+  }finally{
+    connection.release()
+    next()
+  }
+})
+
 
 
 app.get('/current-user', (req, res) => {

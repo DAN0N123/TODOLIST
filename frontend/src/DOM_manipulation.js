@@ -1,12 +1,13 @@
 import { handleUserCreation, handleLoginFormSubmit} from "../../backend/sendUserData";
 import { logoutUser } from "./misc";
+import { addTask } from "./misc";
 import add_task_svg from "./imgs/add_task.svg"
 import add_project_svg from "./imgs/add_project.svg"
 import defaultImgSrc from "./imgs/defaultImg.png"
-const yo = true;
-export default yo;
-// module.exports = createUserForm;
-export function createUserCreationForm(){
+import { Task } from "./misc";
+
+
+export default function createUserCreationForm(){
     const main_container = document.querySelector('.main');
     main_container.innerHTML = '';
 
@@ -222,25 +223,26 @@ export function updateDisplayForUser(username){
     usersSidebar.appendChild(addProjectDiv);
     usersSidebar.appendChild(addTaskDiv);
     userBox.appendChild(usersSidebar);
-
+    
+    function setDialog(){
     const taskDialog = document.createElement('dialog');
     taskDialog.setAttribute('id', 'taskDialog');
     taskDialog.innerHTML = '<form id="taskForm">'+
-    '<input type="text" id="taskName" name="taskName" required placeholder="Task name">'+
+    '<input type="text" id="taskName" name="taskName" required placeholder="Task name" autocomplete="off">'+
     '<br>'+
     '<label for="taskDescription">Description:</label>'+
     '<textarea id="taskDescription" name="taskDescription"></textarea>'+
     '<br>'+
-    '<button type="submit">Create</button>'+
+    '<button type="submit" class="submitButton">Create</button>'+
     '</form>'
     
     sidebar.appendChild(taskDialog);
+    return taskDialog}
+    
 
     sidebar.addEventListener('click', function(event) {
-        console.log(event.target.classList.contains('taskSidebarImg'))
         if (event.target.classList.contains('taskSidebarImg')) {
-            console.log('yo');
-            const taskDialog = document.getElementById('taskDialog');
+            const taskDialog = setDialog();
             if (taskDialog) {
                 taskDialog.showModal();
                 const taskForm = document.getElementById('taskForm');
@@ -248,7 +250,11 @@ export function updateDisplayForUser(username){
                     event.preventDefault();
                     const taskName = document.getElementById('taskName').value;
                     const taskDescription = document.getElementById('taskDescription').value;
-                    taskDialog.close();
+                    const myTask = new Task(taskName, taskDescription)
+                    const myTaskId = myTask.id
+                    const taskData = { taskName, taskDescription, myTaskId}
+                    addTask(taskData)
+                    taskDialog.remove();
                 });
             }
         }
