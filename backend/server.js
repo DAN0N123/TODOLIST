@@ -5,7 +5,7 @@ const session = require('express-session')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+const BACKEND_BASE_URL = 'http://localhost:3000';
 // Create a connection pool for MySQL
 const pool = mysql.createPool({
   host: 'localhost',
@@ -97,8 +97,6 @@ async function createUser(userData) {
   const { username, email, password} = userData;
   const tasks = {};
   const connection = await pool.getConnection();
-  console.log(`connection: ${connection}`)
-
   const usernameAvailable = await isUsernameAvailable(username);
   
   if (!usernameAvailable) {
@@ -146,7 +144,6 @@ app.post('/login', async (req, res, next) => {
 //   }
 
 app.post('/addTask', async (req, res, next) => {
-  console.log('yo add task endpoint')
   const username = req.session.username;
   const newTaskData = req.body;
   const connection = await pool.getConnection();
@@ -155,24 +152,37 @@ app.post('/addTask', async (req, res, next) => {
   const currentTasksJson = userData[0].tasks;
   const currentTasks = JSON.parse(currentTasksJson);
 
-  currentTasks[newTaskData] = newTaskData;
+  currentTasks[newTaskData.taskName] = newTaskData;
   const updatedTasksJson = JSON.stringify(currentTasks);
 
   try {
     const updateTasksQuery = 'UPDATE users SET tasks = ? WHERE username = ?';
     await connection.execute(updateTasksQuery, [updatedTasksJson, username]);
   }finally{
+    console.log('task succesfuly added')
     connection.release()
     next()
   }
 })
 
 
-
-app.get('/current-user', (req, res) => {
+app.get('/user_tasks', async (req, res) => {
+  try {
     const username = req.session.username;
-    res.json({ username });
-  });
+    const connection = await pool.getConnection();
+    const getUserQuery = 'SELECT tasks FROM users WHERE username = ?';
+    const [userData] = await connection.execute(getUserQuery, [username]);
+    const currentTasksJson = userData[0].tasks;
+    const currentTasks = JSON.parse(currentTasksJson);
+    res.json(currentTasks);
+    connection.release();
+  } catch (error) {
+    console.error('Error fetching user tasks:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 // Start the server
 app.listen(PORT, () => {

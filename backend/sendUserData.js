@@ -16,7 +16,6 @@ export async function handleUserCreation() {
                 },
                 body: JSON.stringify(userData)
             });
-            // console.log(JSON.stringify(userData))
             if (!response.ok) {
                 throw new Error('Failed to create user');
             }
@@ -36,7 +35,6 @@ export async function handleLoginFormSubmit(event) {
       username: document.getElementById('inputUsername').value,
       password: document.getElementById('inputPassword').value
     };
-    console.log(formData)
   
     try {
       const response = await fetch('/login', {

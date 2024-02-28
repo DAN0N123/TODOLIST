@@ -1,11 +1,11 @@
 import { handleUserCreation, handleLoginFormSubmit} from "../../backend/sendUserData";
 import { logoutUser } from "./misc";
 import { addTask } from "./misc";
-import add_task_svg from "./imgs/add_task.svg"
-import add_project_svg from "./imgs/add_project.svg"
-import defaultImgSrc from "./imgs/defaultImg.png"
-import { Task } from "./misc";
-
+import add_task_svg from "./imgs/add_task.svg";
+import add_project_svg from "./imgs/add_project.svg";
+import defaultImgSrc from "./imgs/defaultImg.png";
+import { getUserTasks } from "./misc";
+import { getTasksData } from "./misc";
 
 export default function createUserCreationForm(){
     const main_container = document.querySelector('.main');
@@ -239,6 +239,13 @@ export function updateDisplayForUser(username){
     sidebar.appendChild(taskDialog);
     return taskDialog}
     
+    const testButton = document.createElement('button');
+    testButton.addEventListener('click', () => getUserTasks())
+    testButton.textContent = 'TEST'
+    testButton.classList.add('test');
+    sidebar.appendChild(testButton);
+
+
 
     sidebar.addEventListener('click', function(event) {
         if (event.target.classList.contains('taskSidebarImg')) {
@@ -250,9 +257,8 @@ export function updateDisplayForUser(username){
                     event.preventDefault();
                     const taskName = document.getElementById('taskName').value;
                     const taskDescription = document.getElementById('taskDescription').value;
-                    const myTask = new Task(taskName, taskDescription)
-                    const myTaskId = myTask.id
-                    const taskData = { taskName, taskDescription, myTaskId}
+                    // const myTask = new Task(taskName, taskDescription)
+                    const taskData = { taskName, taskDescription}
                     addTask(taskData)
                     taskDialog.remove();
                 });
@@ -280,15 +286,21 @@ export function updateDisplayForUser(username){
     const main_container = document.querySelector('.main');
 
     
-    
+
+
     const mainToday = document.createElement('div');
     mainToday.classList.add('mainToday');
     const mainTodayText = document.createElement('div');
     mainTodayText.textContent = 'Today';
     mainTodayText.style.cssText = "font-size: 25px; font-weight: 700;"
-    // const mainTodayAddTask = document.createElement('div');
-    // const mainTodayAddTaskButton = document.createElement('button');
     
+    // display tasks
+    const taskContainer = document.createElement('div');
+    taskContainer.classList.add('taskContainer');
+    getTasksData()
+    main_container.appendChild(taskContainer)
+
+
     mainToday.appendChild(mainTodayText);
     main_container.appendChild(mainToday);
     if (mainToday.childElementCount < 3){

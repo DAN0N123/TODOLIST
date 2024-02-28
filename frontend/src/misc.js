@@ -39,7 +39,6 @@ export function addTask(taskData) {
     },
     body: JSON.stringify(taskData),
   })
-  
   .catch(error => {
     console.error('Error adding task:', error);
   });
@@ -49,5 +48,34 @@ export class Task{
   constructor(name, description){
     this.name = name;
     this.description = description;
+  }
+}
+
+
+export async function getUserTasks(){
+  try {
+    const response = await fetch('/user_tasks');
+    if (!response.ok) {
+      throw new Error('Failed to fetch tasks');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    throw error;
+  }
+}
+
+export async function getTasksData() {
+  try {
+    const tasksData = await getUserTasks();
+    // console.log(tasksData['test1'])
+    const taskContainer = document.querySelector('.taskContainer');
+    const tasksDataDiv = document.createElement('div');
+    tasksDataDiv.textContent = tasksData['testuje to']['taskDescription'];
+    taskContainer.appendChild(tasksDataDiv);
+
+  } catch (error) {
+    console.error('Error:', error);
   }
 }
