@@ -1,11 +1,7 @@
 import { handleUserCreation, handleLoginFormSubmit} from "../../backend/sendUserData";
 import { logoutUser } from "./misc";
 import { addTask } from "./misc";
-import add_task_svg from "./imgs/add_task.svg";
-import add_project_svg from "./imgs/add_project.svg";
-import defaultImgSrc from "./imgs/defaultImg.png";
-import { getUserTasks } from "./misc";
-import { getTasksData } from "./misc";
+import { displayTasksData } from "./misc";
 
 export default function createUserCreationForm(){
     const main_container = document.querySelector('.main');
@@ -240,7 +236,7 @@ export function updateDisplayForUser(username){
     return taskDialog}
     
     const testButton = document.createElement('button');
-    testButton.addEventListener('click', () => getUserTasks())
+    testButton.addEventListener('click', () => console.log('test'))
     testButton.textContent = 'TEST'
     testButton.classList.add('test');
     sidebar.appendChild(testButton);
@@ -295,31 +291,9 @@ export function updateDisplayForUser(username){
     mainTodayText.style.cssText = "font-size: 25px; font-weight: 700;"
     
     // display tasks
-    const taskContainer = document.createElement('div');
-    taskContainer.classList.add('taskContainer');
-    getTasksData()
-    main_container.appendChild(taskContainer)
-
-
+    displayTasksData()
     mainToday.appendChild(mainTodayText);
     main_container.appendChild(mainToday);
-    if (mainToday.childElementCount < 3){
-        const defaultDiv = document.createElement('div');
-        defaultDiv.style.position = 'absolute';
-
-        defaultDiv.style.cssText = "display: flex; flex-direction: column; align-items:center; position: absolute; left: 0; right: 0; top: 0; bottom: 30%; margin: auto; width:400px; height: 200px;"
-        const defaultImg = document.createElement('img');
-        defaultImg.src = defaultImgSrc;
-        defaultImg.style.width = '294px';
-        const defaultP = document.createElement('p');
-        defaultP.innerHTML = 'What do you have to do today?</br> Tasks added here will be automatically marked as due today'
-        defaultP.style.marginLeft = '5%'
-        defaultDiv.appendChild(defaultImg);
-        defaultDiv.appendChild(defaultP);
-        main_container.appendChild(defaultDiv);
-    }
-    
-
 }
 
 export function setInitialUserBox(){
