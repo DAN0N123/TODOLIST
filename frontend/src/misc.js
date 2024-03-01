@@ -88,33 +88,54 @@ export async function displayTasksData() {
         taskDescriptionDiv.classList.add('card-body');
         taskDescriptionDiv.textContent = value['taskDescription']
         taskDescriptionOuterDiv.appendChild(taskDescriptionDiv)
-        const taskMain = document.createElement('button');
-        taskMain.classList.add('taskMain')
-        taskMain.type = 'button';
-        taskMain.setAttribute('data-bs-toggle', 'collapse');
-        taskMain.setAttribute('data-bs-target', `#${key}TaskDescription`)
-        taskMain.ariaExpanded = "false";
-        const taskName = document.createElement('p');
+        const taskMain = document.createElement('div');
+        taskMain.classList.add('taskMain');
+        const taskName = document.createElement('button');
         taskName.classList.add('taskName')
+        taskName.type = 'button';
+        taskName.id = `${key}TaskName`
+        taskName.setAttribute('data-bs-toggle', 'collapse');
+        taskName.setAttribute('data-bs-target', `#${key}TaskDescription`)
+        taskName.ariaExpanded = "false";
         taskName.textContent = value['taskName'];
-        taskMain.appendChild(taskName)
-        const taskDueDate = document.createElement('div');
-        taskDueDate.id = `${key}DueDate`
-        const datepicker = new Datepicker(taskDueDate, {
-          //options
-        }); 
+
+        
+        const taskDueDate = document.createElement('input');
+        taskDueDate.classList.add('taskDueDate')
+        taskDueDate.type = 'text'
+        taskDueDate.id = `${key}`
+        taskDueDate.addEventListener('change', function() {
+          value['dueDate'] = this.value;
+        });
+        taskDueDate.addEventListener('click', function(){
+          const datepicker = new Datepicker(taskDueDate, {
+            dataDate: new Date()})
+
+          const taskCollapse = document.querySelector(`#${this.id}TaskDescription`)
+          taskCollapse.classList.remove('show');
+          }); 
+        
+
+        taskName.addEventListener('click', function() {
+          const target = this.getAttribute('data-bs-target');
+          const allCollapse = document.querySelectorAll('.collapse');
+          allCollapse.forEach(collapse => {
+              if (collapse.id !== target) {
+                  collapse.classList.remove('show');
+              }
+          });
+      });
+
+        taskMain.appendChild(taskName);
         taskMain.appendChild(taskDueDate);
         outerP.appendChild(taskMain);
         taskDiv.id = `Task-${key}`;
         taskDiv.appendChild(outerP);
         taskDiv.appendChild(taskDescriptionOuterDiv);
-        taskMain.appendChild
+        taskName.appendChild
         taskContainer.appendChild(taskDiv);
       }
     }
-    
-
-
 
     if (taskContainer.childElementCount == 0){
       const defaultDiv = document.createElement('div');

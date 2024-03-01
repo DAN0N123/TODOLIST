@@ -3,6 +3,10 @@ import { logoutUser } from "./misc";
 import { addTask } from "./misc";
 import { displayTasksData } from "./misc";
 
+import Datepicker from '/node_modules/vanillajs-datepicker/js/Datepicker.js';
+import 'vanillajs-datepicker/css/datepicker.css';
+
+
 export default function createUserCreationForm(){
     const main_container = document.querySelector('.main');
     main_container.innerHTML = '';
@@ -229,6 +233,8 @@ export function updateDisplayForUser(username){
     '<label for="taskDescription">Description:</label>'+
     '<textarea id="taskDescription" name="taskDescription"></textarea>'+
     '<br>'+
+    '<input type="text" id="dateInput" placeholder="Due Date" required="true"></input>'+
+    '</br>'+
     '<button type="submit" class="submitButton">Create</button>'+
     '</form>'
     
@@ -248,15 +254,26 @@ export function updateDisplayForUser(username){
             const taskDialog = setDialog();
             if (taskDialog) {
                 taskDialog.showModal();
+                const taskDueDateInput = taskDialog.querySelector("#dateInput")
+                taskDueDateInput.addEventListener('change', function() {
+                    value['dueDate'] = this.value;
+                });
+                taskDueDateInput.addEventListener('click', function(){
+                const datepicker = new Datepicker(taskDueDateInput, {
+                    dataDate: new Date()});
+                const inputRect = taskDueDateInput.getBoundingClientRect();
+                const datepickerWidth = datepicker.element.offsetWidth;
+                });
+
                 const taskForm = document.getElementById('taskForm');
                 taskForm.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    const taskName = document.getElementById('taskName').value;
-                    const taskDescription = document.getElementById('taskDescription').value;
-                    // const myTask = new Task(taskName, taskDescription)
-                    const taskData = { taskName, taskDescription}
-                    addTask(taskData)
-                    taskDialog.remove();
+                event.preventDefault();
+                const taskName = document.getElementById('taskName').value;
+                const taskDescription = document.getElementById('taskDescription').value;
+                // const myTask = new Task(taskName, taskDescription)
+                const taskData = { taskName, taskDescription}
+                addTask(taskData)
+                taskDialog.remove();
                 });
             }
         }
@@ -288,7 +305,7 @@ export function updateDisplayForUser(username){
     mainToday.classList.add('mainToday');
     const mainTodayText = document.createElement('div');
     mainTodayText.textContent = 'Today';
-    mainTodayText.style.cssText = "font-size: 25px; font-weight: 700;"
+    mainTodayText.style.cssText = "font-size: 25px; font-weight: 700; margin-bottom: 50px;"
     
     // display tasks
     displayTasksData()
