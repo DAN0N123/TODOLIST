@@ -146,6 +146,7 @@ export function createLoginForm(){
 };
 
 export function updateDisplayForUser(username){
+    const main_container = document.querySelector('.main');
     const userBox = document.querySelector('.userBox');
     userBox.innerHTML = '';
     const usernameDiv = document.createElement('div');
@@ -172,6 +173,10 @@ export function updateDisplayForUser(username){
     usernameDiv.appendChild(usernameDropdownUl);
     userBox.appendChild(usernameDiv);
     userBox.style.marginBottom = '40%'
+
+
+    
+    
 
     const sidebar = document.querySelector('.sidebar');
 
@@ -233,7 +238,7 @@ export function updateDisplayForUser(username){
     '<label for="taskDescription">Description:</label>'+
     '<textarea id="taskDescription" name="taskDescription"></textarea>'+
     '<br>'+
-    '<input type="text" id="dateInput" placeholder="Due Date" required="true"></input>'+
+    '<input type="text" id="taskDueDate" placeholder="Due Date" required="true" autocomplete="off"></input>'+
     '</br>'+
     '<button type="submit" class="submitButton">Create</button>'+
     '</form>'
@@ -246,7 +251,8 @@ export function updateDisplayForUser(username){
     testButton.textContent = 'TEST'
     testButton.classList.add('test');
     sidebar.appendChild(testButton);
-
+    
+    
 
 
     sidebar.addEventListener('click', function(event) {
@@ -254,26 +260,24 @@ export function updateDisplayForUser(username){
             const taskDialog = setDialog();
             if (taskDialog) {
                 taskDialog.showModal();
-                const taskDueDateInput = taskDialog.querySelector("#dateInput")
-                taskDueDateInput.addEventListener('change', function() {
-                    value['dueDate'] = this.value;
-                });
+                const taskDueDateInput = taskDialog.querySelector("#taskDueDate")
                 taskDueDateInput.addEventListener('click', function(){
-                const datepicker = new Datepicker(taskDueDateInput, {
-                    dataDate: new Date()});
-                const inputRect = taskDueDateInput.getBoundingClientRect();
-                const datepickerWidth = datepicker.element.offsetWidth;
-                });
+                const datepicker = new Datepicker(taskDueDateInput, { 
+                    // options
+                })});
 
                 const taskForm = document.getElementById('taskForm');
                 taskForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 const taskName = document.getElementById('taskName').value;
                 const taskDescription = document.getElementById('taskDescription').value;
+                const taskDueDate = document.getElementById('taskDueDate').value;
                 // const myTask = new Task(taskName, taskDescription)
-                const taskData = { taskName, taskDescription}
-                addTask(taskData)
+                const isCompleted = false;
+                const taskData = { taskName, taskDescription, taskDueDate, isCompleted};
+                addTask(taskData);
                 taskDialog.remove();
+                location.reload();
                 });
             }
         }
@@ -296,21 +300,9 @@ export function updateDisplayForUser(username){
         }
     });
     
-    const main_container = document.querySelector('.main');
-
-    
-
-
-    const mainToday = document.createElement('div');
-    mainToday.classList.add('mainToday');
-    const mainTodayText = document.createElement('div');
-    mainTodayText.textContent = 'Today';
-    mainTodayText.style.cssText = "font-size: 25px; font-weight: 700; margin-bottom: 50px;"
     
     // display tasks
     displayTasksData()
-    mainToday.appendChild(mainTodayText);
-    main_container.appendChild(mainToday);
 }
 
 export function setInitialUserBox(){

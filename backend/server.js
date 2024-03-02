@@ -143,15 +143,27 @@ app.post('/login', async (req, res, next) => {
 //     }
 //   }
 
+app.post('/saveTaskUpdates', async (req,res,next) => {
+  const username = req.session.username;
+  const connection = await pool.getConnection();
+  const getTasksQuery = 'SELECT tasks from users WHERE username = ?';
+  const dbTasks = await connection.execute(getTasksQuery, [username]);
+  const updatedTasksStatus = req.session.body;
+  for(i = 0; i < dbTasks.length; i++){
+    dbTasks[i]['isCompleted'] = updatedTasksStatus[i]
+  }
+})
+
 app.post('/addTask', async (req, res, next) => {
   const username = req.session.username;
   const newTaskData = req.body;
   const connection = await pool.getConnection();
   const getUserQuery = 'SELECT tasks FROM users WHERE username = ?';
   const [userData] = await connection.execute(getUserQuery, [username]);
-  const currentTasksJson = userData[0].tasks;
+  const currentTasksJson = userData[0].tasks || JSON.stringify({});
   const currentTasks = JSON.parse(currentTasksJson);
-
+  console.log(`currentTasks: ${currentTasks}`);
+  console.log(`newTaskData: ${newTaskData}`)
   currentTasks[newTaskData.taskName] = newTaskData;
   const updatedTasksJson = JSON.stringify(currentTasks);
 
