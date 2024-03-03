@@ -146,12 +146,9 @@ app.post('/login', async (req, res, next) => {
 app.post('/saveTaskUpdates', async (req,res,next) => {
   const username = req.session.username;
   const connection = await pool.getConnection();
-  const getTasksQuery = 'SELECT tasks from users WHERE username = ?';
-  const dbTasks = await connection.execute(getTasksQuery, [username]);
-  const updatedTasksStatus = req.session.body;
-  for(i = 0; i < dbTasks.length; i++){
-    dbTasks[i]['isCompleted'] = updatedTasksStatus[i]
-  }
+  const updatedTasks = req.body;
+  const updateQuery = 'UPDATE users SET tasks = ? WHERE username = ?';
+  await connection.execute(updateQuery, [updatedTasks, username])
 })
 
 app.post('/addTask', async (req, res, next) => {

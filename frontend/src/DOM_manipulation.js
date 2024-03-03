@@ -2,7 +2,7 @@ import { handleUserCreation, handleLoginFormSubmit} from "../../backend/sendUser
 import { logoutUser } from "./misc";
 import { addTask } from "./misc";
 import { displayTasksData } from "./misc";
-
+import { setMultiselect } from "./MOTUS";
 import Datepicker from '/node_modules/vanillajs-datepicker/js/Datepicker.js';
 import 'vanillajs-datepicker/css/datepicker.css';
 
@@ -229,11 +229,14 @@ export function updateDisplayForUser(username){
     usersSidebar.appendChild(addTaskDiv);
     userBox.appendChild(usersSidebar);
     
-    function setDialog(){
+    function setTaskDialog(){
     const taskDialog = document.createElement('dialog');
     taskDialog.setAttribute('id', 'taskDialog');
     taskDialog.innerHTML = '<form id="taskForm">'+
     '<input type="text" id="taskName" name="taskName" required placeholder="Task name" autocomplete="off">'+
+    '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">'+
+    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>'+
+    '</svg>'+
     '<br>'+
     '<label for="taskDescription">Description:</label>'+
     '<textarea id="taskDescription" name="taskDescription"></textarea>'+
@@ -244,20 +247,50 @@ export function updateDisplayForUser(username){
     '</form>'
     
     sidebar.appendChild(taskDialog);
-    return taskDialog}
+    return taskDialog
+    }
+
+    function setProjectDialog(){
+        const projectDialog = document.createElement('dialog');
+        const sidebar = document.querySelector('.sidebar')
+        projectDialog.setAttribute('id', 'projectDialog');
+        projectDialog.innerHTML = '<form id="projectForm">'+
+        '<input type="text" id="projectName" name="projectName" required placeholder="Project name" autocomplete="off">'+
+        '<br>'+
+        '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">'+
+        '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>'+
+        '</svg>'+
+        '<label for="taskSelection">Select tasks for project:</label>'+
+        '<img>'
+        '<div style="width: 200px;">'+
+        '<div id="taskSelection">'+
+        '</div>'+
+        '</div>'+
+        '</br>'+
+        '<button type="submit" class="submitButton">Create</button>'+
+        '</form>'
+        sidebar.appendChild(projectDialog);
+        const task_container = document.querySelector('.taskContainer');
+        const selectionData = []
+        for(const child of task_container.children){
+            if(child.classList.contains('taskDiv')){
+                const taskName = child.querySelector('.taskName').textContent;
+                const option = {label: taskName, value: taskName}
+                selectionData.push(option)
+            }
+        }
+        setMultiselect(selectionData)
     
-    const testButton = document.createElement('button');
-    testButton.addEventListener('click', () => console.log('test'))
-    testButton.textContent = 'TEST'
-    testButton.classList.add('test');
-    sidebar.appendChild(testButton);
+    return projectDialog
+    }
+    
     
     
 
 
     sidebar.addEventListener('click', function(event) {
         if (event.target.classList.contains('taskSidebarImg')) {
-            const taskDialog = setDialog();
+            const taskDialog = setTaskDialog();
             if (taskDialog) {
                 taskDialog.showModal();
                 const taskDueDateInput = taskDialog.querySelector("#taskDueDate")
@@ -277,6 +310,21 @@ export function updateDisplayForUser(username){
                 const taskData = { taskName, taskDescription, taskDueDate, isCompleted};
                 addTask(taskData);
                 taskDialog.remove();
+                location.reload();
+                });
+            }
+        };
+        if (event.target.classList.contains('projectSidebarImg')) {
+            const projectDialog = setProjectDialog();
+            if (projectDialog) {
+                projectDialog.showModal();
+
+                const projectForm = document.getElementById('projectForm');
+                projectForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const projectName = document.getElementById('projectName').value;
+                const taskSelection = document.getElementById('taskSelection').value
+                projectDialog.remove();
                 location.reload();
                 });
             }

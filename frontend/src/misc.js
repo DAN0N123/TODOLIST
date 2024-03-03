@@ -24,7 +24,7 @@ export default function checkUserAuthentication() {
 export function logoutUser(){
     fetch('/logout')
         .then(() => {
-            checkUserAuthentication();
+            location.reload()
         })
         .catch(error => {
             console.error('Error logging out:', error);
@@ -51,7 +51,6 @@ export class Task{
     this.dueDate = dueDate;
   }
 }
-
 
 export async function getUserTasks(){
   try {
@@ -104,7 +103,7 @@ export async function displayTasksData() {
         if (document.getElementById('saveButton') === null){
           const saveButton = document.createElement('button');
           saveButton.textContent = 'SAVE';
-          saveButton.addEventListener('click', (event) => saveTaskUpdates(event.currentTarget))
+          saveButton.addEventListener('click', (event) => saveTaskUpdates(event.currentTarget, tasksData))
           saveButton.id = 'saveButton';
           saveButton.classList.add('hide');
           taskMain.appendChild(saveButton);
@@ -117,8 +116,16 @@ export async function displayTasksData() {
         taskDueDate.id = `${key}`
         taskDueDate.value = value['taskDueDate'];
 
-        function saveTaskUpdates(button){
+        function saveTaskUpdates(button, tasks){
           button.classList.add('hide')
+          const currentTasks = tasks;
+          fetch('/saveTaskUpdates', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(currentTasks),
+          })
         }
 
         function pickImage(value){
@@ -143,8 +150,6 @@ export async function displayTasksData() {
         taskCompletionImgDiv.appendChild(taskCompletionImg);
         taskDueDate.addEventListener('change', function() {
           value['dueDate'] = this.value;
-          console.log(this)
-          console.log('yo')
         });
 
         taskDueDate.addEventListener('click', function(){
