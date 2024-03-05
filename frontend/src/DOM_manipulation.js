@@ -1,8 +1,8 @@
-import { handleUserCreation, handleLoginFormSubmit} from "../../backend/sendUserData";
+import { handleUserCreation, handleLoginFormSubmit } from "../../backend/sendUserData";
 import { logoutUser } from "./misc";
 import { addTask } from "./misc";
 import { displayTasksData } from "./misc";
-import { setMultiselect } from "./MOTUS";
+import { addProject } from "./misc";
 import Datepicker from '/node_modules/vanillajs-datepicker/js/Datepicker.js';
 import 'vanillajs-datepicker/css/datepicker.css';
 
@@ -174,11 +174,14 @@ export function updateDisplayForUser(username){
     userBox.appendChild(usernameDiv);
     userBox.style.marginBottom = '40%'
 
-
-    
-    
-
     const sidebar = document.querySelector('.sidebar');
+    
+    // const testButton = document.createElement('button');
+    // testButton.id = 'testButton';
+    // testButton.addEventListener('click', () => )
+    // sidebar.appendChild(testButton);
+    
+    
 
     const addTaskDiv = document.createElement('div');
     addTaskDiv.classList.add('addStuffDiv')
@@ -247,6 +250,11 @@ export function updateDisplayForUser(username){
     '</form>'
     
     sidebar.appendChild(taskDialog);
+    const exitButton = taskDialog.querySelector('svg');
+    exitButton.addEventListener('click', () => {
+        const taskDialog = document.getElementById('taskDialog');
+        taskDialog.remove()
+    })
     return taskDialog
     }
 
@@ -261,26 +269,30 @@ export function updateDisplayForUser(username){
         '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>'+
         '</svg>'+
         '<label for="taskSelection">Select tasks for project:</label>'+
-        '<img>'
-        '<div style="width: 200px;">'+
-        '<div id="taskSelection">'+
-        '</div>'+
-        '</div>'+
+        '<multi-checkbox id="taskSelection" separator="," value="">'+
+        '<ul id="multiCheckbox" slot="check-values">'+
+        '</ul>'+
+        '</multi-checkbox>'+
         '</br>'+
         '<button type="submit" class="submitButton">Create</button>'+
         '</form>'
         sidebar.appendChild(projectDialog);
+        const exitButton = projectDialog.querySelector('svg');
+        exitButton.addEventListener('click', () => {
+            const projectDialog = document.getElementById('projectDialog');
+            projectDialog.remove()
+        })
         const task_container = document.querySelector('.taskContainer');
-        const selectionData = []
+        const multiCheckbox = document.getElementById('multiCheckbox');
         for(const child of task_container.children){
             if(child.classList.contains('taskDiv')){
                 const taskName = child.querySelector('.taskName').textContent;
-                const option = {label: taskName, value: taskName}
-                selectionData.push(option)
+                const li = document.createElement('li');
+                li.textContent = taskName;
+                multiCheckbox.appendChild(li)
             }
         }
-        setMultiselect(selectionData)
-    
+        
     return projectDialog
     }
     
@@ -323,9 +335,11 @@ export function updateDisplayForUser(username){
                 projectForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 const projectName = document.getElementById('projectName').value;
-                const taskSelection = document.getElementById('taskSelection').value
+                const taskSelection = document.getElementById('taskSelection').value.split(',')
+                const projectData = {'name' : projectName, 'tasks' : taskSelection};
+                addProject(projectData)
                 projectDialog.remove();
-                location.reload();
+                // location.reload();
                 });
             }
         }

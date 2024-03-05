@@ -67,7 +67,18 @@ export async function getUserTasks(){
 }
 
 
-
+export async function addProject(projectData){
+  fetch('/addProject', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(projectData),
+  })
+  .catch(error => {
+    console.error('Error adding task:', error);
+  });
+};
 export async function displayTasksData() {
   try {
     const tasksData = await getUserTasks();
@@ -84,7 +95,7 @@ export async function displayTasksData() {
         outerP.classList.add('gap-1');
         const taskDescriptionOuterDiv = document.createElement('div');
         taskDescriptionOuterDiv.classList.add('collapse');
-        taskDescriptionOuterDiv.id = `${key}TaskDescription`
+        taskDescriptionOuterDiv.id = `TaskDescription${key}`
         const taskDescriptionDiv = document.createElement('div');
         taskDescriptionDiv.classList.add('card');
         taskDescriptionDiv.classList.add('card-body');
@@ -95,9 +106,9 @@ export async function displayTasksData() {
         const taskName = document.createElement('button');
         taskName.classList.add('taskName')
         taskName.type = 'button';
-        taskName.id = `${key}TaskName`
+        taskName.id = `TaskName${key}`
         taskName.setAttribute('data-bs-toggle', 'collapse');
-        taskName.setAttribute('data-bs-target', `#${key}TaskDescription`)
+        taskName.setAttribute('data-bs-target', `#TaskDescription${key}`)
         taskName.ariaExpanded = "false";
         taskName.textContent = value['taskName'];
         if (document.getElementById('saveButton') === null){
@@ -113,7 +124,7 @@ export async function displayTasksData() {
         const taskDueDate = document.createElement('input');
         taskDueDate.classList.add('taskDueDate')
         taskDueDate.type = 'text'
-        taskDueDate.id = `${key}`
+        // taskDueDate.id = `${key}`
         taskDueDate.value = value['taskDueDate'];
 
         function saveTaskUpdates(button, tasks){
@@ -158,7 +169,7 @@ export async function displayTasksData() {
           });
           const datepickerElement = document.querySelector('.view-switch');
           datepickerElement.addEventListener('change', () =>{console.log('yo')})
-          const taskCollapse = document.querySelector(`#${this.id}TaskDescription`)
+          const taskCollapse = document.querySelector(`#TaskDescription${this.id}`)
           taskCollapse.classList.remove('show');
           }); 
         

@@ -19,6 +19,7 @@ const pool = mysql.createPool({
 
 
 const crypto = require('crypto');
+const { connect } = require('http2');
 const sessionSecret = crypto.randomBytes(32).toString('hex');
 app.use(session({
     secret: sessionSecret,
@@ -159,8 +160,6 @@ app.post('/addTask', async (req, res, next) => {
   const [userData] = await connection.execute(getUserQuery, [username]);
   const currentTasksJson = userData[0].tasks || JSON.stringify({});
   const currentTasks = JSON.parse(currentTasksJson);
-  console.log(`currentTasks: ${currentTasks}`);
-  console.log(`newTaskData: ${newTaskData}`)
   currentTasks[newTaskData.taskName] = newTaskData;
   const updatedTasksJson = JSON.stringify(currentTasks);
 
@@ -174,6 +173,33 @@ app.post('/addTask', async (req, res, next) => {
   }
 })
 
+app.post('/addProject', async (req,res,next) => {
+  const username = req.session.username;
+  const connection = await pool.getConnection()
+  const name = req.body.name;
+  const tasks = req.body.tasks;
+  const getTaskQuery = 'SELECT tasks FROM users WHERE username = ?';
+  const userTasks = await connection.execute(getTaskQuery, [username]);
+  const userTasksParsed = JSON.parse(userTasks[0][0].tasks);
+  const projectTasks = {};
+  tasks.forEach( (task) => {
+    projectTasks[task] = userTasksParsed[task]} );
+  const getProjectQuery = 'SELECT projects FROM users WHERE username = ?'
+  const [projectData] = await connection.execute(getProjectQuery, [username]);
+  const currentProjects = projectData[0]['projects'] || JSON.stringify({});
+  currentProjects[name] = projectTasks;
+  const currentProjectsUpdated = JSON.stringify(currentProjects);
+  try{
+  const addProjectQuery = 'UPDATE users SET projects = ? WHERE username = ?'
+  await connection.execute(addProjectQuery, [currentProjectsUpdated, username])
+  }finally{
+    console.log('project succesfully added')
+    connection.release()
+    next()
+  }
+  
+}
+);
 
 app.get('/user_tasks', async (req, res) => {
   try {
