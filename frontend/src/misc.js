@@ -3,7 +3,7 @@ import { setInitialUserBox } from "./DOM_manipulation";
 import defaultImgSrc from "./imgs/defaultImg.png"
 import Datepicker from '/node_modules/vanillajs-datepicker/js/Datepicker.js';
 import 'vanillajs-datepicker/css/datepicker.css';
-
+import { setTaskDialog } from "./DOM_manipulation";
 
 export default function checkUserAuthentication() {
   fetch('/check_authentication')
@@ -79,10 +79,14 @@ export async function addProject(projectData){
     console.error('Error adding task:', error);
   });
 };
-export async function displayTasksData() {
+export async function displayTasksData(data) {
   try {
-    const tasksData = await getUserTasks();
-    const main_container = document.querySelector('.main')
+    const tasksData = data || await getUserTasks();
+    const main_container = document.querySelector('.main');
+    main_container.innerHTML = '';
+    const mainDisplay = document.createElement('div');
+    mainDisplay.classList.add('mainDisplay')
+    mainDisplay.style.cssText = 'width: 1100px; display: flex; flex-direction: column; align-items: space-around'
     const taskContainer = document.createElement('div');
     taskContainer.classList.add('taskContainer');
     for (const key in tasksData) {
@@ -197,10 +201,24 @@ export async function displayTasksData() {
       }
     }
 
-    const mainTodayText = document.createElement('div');
-    mainTodayText.textContent = 'Today';
-    mainTodayText.style.cssText = "font-size: 25px; font-weight: 700; margin-bottom: 50px;"
-    main_container.appendChild(mainTodayText);
+    const mainSplit = document.createElement('div');
+    mainSplit.classList.add('btn-group')
+    mainSplit.innerHTML =
+    '<div class="btn-group">'+
+      '<button type="button" class="btn splitBtn">Today</button>'+
+      '<button type="button" class="btn splitBtn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">'+
+      '</button>'+
+      '<ul class="dropdown-menu">'+
+        '<li><button class="dropdown-item">Projects</button></li>'+
+        '<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>'+
+        '<li><button class="dropdown-item">Filter by date</button></li>'+
+        '<li><hr class="dropdown-divider"></li>'+
+        '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
+      '</ul>'+
+    '</div>'
+    mainDisplay.appendChild(mainSplit);
+
+    
 
     if (taskContainer.childElementCount == 0){
       const defaultDiv = document.createElement('div');
@@ -220,10 +238,33 @@ export async function displayTasksData() {
   }
 
   
+  mainDisplay.appendChild(taskContainer);
+  main_container.appendChild(mainDisplay);
 
-  main_container.appendChild(taskContainer);
+  const addTaskButton = document.getElementById('addTaskButton');
+  addTaskButton.addEventListener('click', () => setTaskDialog())
+
+  const tasksTodayButton = document.getElementById('tasksTodayButton');
+  tasksTodayButton.addEventListener('click', async function(){
+    const taskData = await getUserTasks();
+    const filteredData = {};
+    const year = new Date().getFullYear();
+    const dayStr = String(new Date().getDate());
+    const day = ('' + dayStr).padStart(2, "0")
+    const monthStr = String(new Date().getMonth() + 1)
+    const month =  ('' + monthStr).padStart(2, "0");
+    
+    for(const task in taskData){
+      if(taskData[task]['taskDueDate'] == `${month}/${day}/${year}`){
+        filteredData[task] = taskData[task];
+      }
+    }
+    displayTasksData(filteredData)
+  })
 
   } catch (error) {
     console.error('Error:', error);
   }
 }
+
+

@@ -147,6 +147,7 @@ export function createLoginForm(){
 
 export function updateDisplayForUser(username){
     const main_container = document.querySelector('.main');
+    const sidebar = document.querySelector('.sidebar');
     const userBox = document.querySelector('.userBox');
     userBox.innerHTML = '';
     const usernameDiv = document.createElement('div');
@@ -160,12 +161,28 @@ export function updateDisplayForUser(username){
     usernameButton.setAttribute('data-bs-toggle', 'dropdown');
     usernameButton.setAttribute('aria-expanded', 'false');
     usernameButton.textContent = username;
+    usernameButton.style.zIndex = 9999;
+    usernameButton.addEventListener('mouseover', () =>{
+        const ul = document.querySelector('.dropdown-menu');
+        ul.classList.add('show')
+    })
+    usernameButton.addEventListener('mouseleave', () =>{
+        const ul = document.querySelector('.dropdown-menu');
+        ul.classList.remove('show')})
+
     const usernameDropdownUl = document.createElement('ul');
+    usernameDropdownUl.style.zIndex = 9999;
     usernameDropdownUl.classList.add('dropdown-menu');
+    usernameDropdownUl.addEventListener('mouseleave', () =>{
+        const ul = document.querySelector('.dropdown-menu');
+        ul.classList.remove('show')})
+    usernameDropdownUl.addEventListener('mouseover', () =>{
+        const ul = document.querySelector('.dropdown-menu');
+        ul.classList.add('show')})
     const logoutOptionLi = document.createElement('li');
     const logoutButton = document.createElement('button');
     logoutButton.textContent = 'Logout';
-    logoutButton.setAttribute('id', 'logoutButton');
+    logoutButton.classList.add('userDropdownButton')
     logoutButton.addEventListener('click', logoutUser)
     logoutOptionLi.appendChild(logoutButton);
     usernameDropdownUl.appendChild(logoutOptionLi);
@@ -174,7 +191,7 @@ export function updateDisplayForUser(username){
     userBox.appendChild(usernameDiv);
     userBox.style.marginBottom = '40%'
 
-    const sidebar = document.querySelector('.sidebar');
+    
     
     // const testButton = document.createElement('button');
     // testButton.id = 'testButton';
@@ -232,69 +249,9 @@ export function updateDisplayForUser(username){
     usersSidebar.appendChild(addTaskDiv);
     userBox.appendChild(usersSidebar);
     
-    function setTaskDialog(){
-    const taskDialog = document.createElement('dialog');
-    taskDialog.setAttribute('id', 'taskDialog');
-    taskDialog.innerHTML = '<form id="taskForm">'+
-    '<input type="text" id="taskName" name="taskName" required placeholder="Task name" autocomplete="off">'+
-    '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">'+
-    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>'+
-    '</svg>'+
-    '<br>'+
-    '<label for="taskDescription">Description:</label>'+
-    '<textarea id="taskDescription" name="taskDescription"></textarea>'+
-    '<br>'+
-    '<input type="text" id="taskDueDate" placeholder="Due Date" required="true" autocomplete="off"></input>'+
-    '</br>'+
-    '<button type="submit" class="submitButton">Create</button>'+
-    '</form>'
     
-    sidebar.appendChild(taskDialog);
-    const exitButton = taskDialog.querySelector('svg');
-    exitButton.addEventListener('click', () => {
-        const taskDialog = document.getElementById('taskDialog');
-        taskDialog.remove()
-    })
-    return taskDialog
-    }
 
-    function setProjectDialog(){
-        const projectDialog = document.createElement('dialog');
-        const sidebar = document.querySelector('.sidebar')
-        projectDialog.setAttribute('id', 'projectDialog');
-        projectDialog.innerHTML = '<form id="projectForm">'+
-        '<input type="text" id="projectName" name="projectName" required placeholder="Project name" autocomplete="off">'+
-        '<br>'+
-        '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">'+
-        '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>'+
-        '</svg>'+
-        '<label for="taskSelection">Select tasks for project:</label>'+
-        '<multi-checkbox id="taskSelection" separator="," value="">'+
-        '<ul id="multiCheckbox" slot="check-values">'+
-        '</ul>'+
-        '</multi-checkbox>'+
-        '</br>'+
-        '<button type="submit" class="submitButton">Create</button>'+
-        '</form>'
-        sidebar.appendChild(projectDialog);
-        const exitButton = projectDialog.querySelector('svg');
-        exitButton.addEventListener('click', () => {
-            const projectDialog = document.getElementById('projectDialog');
-            projectDialog.remove()
-        })
-        const task_container = document.querySelector('.taskContainer');
-        const multiCheckbox = document.getElementById('multiCheckbox');
-        for(const child of task_container.children){
-            if(child.classList.contains('taskDiv')){
-                const taskName = child.querySelector('.taskName').textContent;
-                const li = document.createElement('li');
-                li.textContent = taskName;
-                multiCheckbox.appendChild(li)
-            }
-        }
-        
-    return projectDialog
-    }
+    
     
     
     
@@ -303,45 +260,9 @@ export function updateDisplayForUser(username){
     sidebar.addEventListener('click', function(event) {
         if (event.target.classList.contains('taskSidebarImg')) {
             const taskDialog = setTaskDialog();
-            if (taskDialog) {
-                taskDialog.showModal();
-                const taskDueDateInput = taskDialog.querySelector("#taskDueDate")
-                taskDueDateInput.addEventListener('click', function(){
-                const datepicker = new Datepicker(taskDueDateInput, { 
-                    // options
-                })});
-
-                const taskForm = document.getElementById('taskForm');
-                taskForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const taskName = document.getElementById('taskName').value;
-                const taskDescription = document.getElementById('taskDescription').value;
-                const taskDueDate = document.getElementById('taskDueDate').value;
-                // const myTask = new Task(taskName, taskDescription)
-                const isCompleted = false;
-                const taskData = { taskName, taskDescription, taskDueDate, isCompleted};
-                addTask(taskData);
-                taskDialog.remove();
-                location.reload();
-                });
-            }
         };
         if (event.target.classList.contains('projectSidebarImg')) {
             const projectDialog = setProjectDialog();
-            if (projectDialog) {
-                projectDialog.showModal();
-
-                const projectForm = document.getElementById('projectForm');
-                projectForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const projectName = document.getElementById('projectName').value;
-                const taskSelection = document.getElementById('taskSelection').value.split(',')
-                const projectData = {'name' : projectName, 'tasks' : taskSelection};
-                addProject(projectData)
-                projectDialog.remove();
-                // location.reload();
-                });
-            }
         }
     });
 
@@ -370,14 +291,11 @@ export function updateDisplayForUser(username){
 export function setInitialUserBox(){
     const userBox = document.querySelector('.userBox');
     userBox.innerHTML = '';
-    
 
     const login_button = document.createElement('button');
     login_button.textContent = 'Login';
     login_button.addEventListener('click', () => createLoginForm());
     userBox.appendChild(login_button);
-
-
     const noAccount = document.createElement('div');
     noAccount.classList.add('noAccount');
 
@@ -390,3 +308,104 @@ export function setInitialUserBox(){
     noAccount.appendChild(user_button)
     userBox.appendChild(noAccount)
 };
+
+
+export function setProjectDialog(){
+    const projectDialog = document.createElement('dialog');
+    const sidebar = document.querySelector('.sidebar')
+    projectDialog.setAttribute('id', 'projectDialog');
+    projectDialog.innerHTML = '<form id="projectForm">'+
+    '<input type="text" id="projectName" name="projectName" required placeholder="Project name" autocomplete="off">'+
+    '<br>'+
+    '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">'+
+    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>'+
+    '</svg>'+
+    '<label for="taskSelection">Select tasks for project:</label>'+
+    '<multi-checkbox id="taskSelection" separator="," value="">'+
+    '<ul id="multiCheckbox" slot="check-values">'+
+    '</ul>'+
+    '</multi-checkbox>'+
+    '</br>'+
+    '<button type="submit" class="submitButton">Create</button>'+
+    '</form>'
+    sidebar.appendChild(projectDialog);
+    const exitButton = projectDialog.querySelector('svg');
+    exitButton.addEventListener('click', () => {
+        const projectDialog = document.getElementById('projectDialog');
+        projectDialog.remove()
+    })
+    const task_container = document.querySelector('.taskContainer');
+    const multiCheckbox = document.getElementById('multiCheckbox');
+    for(const child of task_container.children){
+        if(child.classList.contains('taskDiv')){
+            const taskName = child.querySelector('.taskName').textContent;
+            const li = document.createElement('li');
+            li.textContent = taskName;
+            multiCheckbox.appendChild(li)
+        }
+    }
+    if (projectDialog) {
+        projectDialog.showModal();
+
+        const projectForm = document.getElementById('projectForm');
+        projectForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const projectName = document.getElementById('projectName').value;
+        const taskSelection = document.getElementById('taskSelection').value.split(',')
+        const projectData = {'name' : projectName, 'tasks' : taskSelection};
+        addProject(projectData)
+        projectDialog.remove();
+        location.reload();
+        });
+    }
+    return projectDialog
+}
+
+
+export function setTaskDialog(){
+    const taskDialog = document.createElement('dialog');
+    const sidebar = document.querySelector('.sidebar');
+    taskDialog.setAttribute('id', 'taskDialog');
+    taskDialog.innerHTML = '<form id="taskForm">'+
+    '<input type="text" id="taskName" name="taskName" required placeholder="Task name" autocomplete="off">'+
+    '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">'+
+    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>'+
+    '</svg>'+
+    '<br>'+
+    '<label for="taskDescription">Description:</label>'+
+    '<textarea id="taskDescription" name="taskDescription"></textarea>'+
+    '<br>'+
+    '<input type="text" id="taskDueDate" placeholder="Due Date" required="true" autocomplete="off"></input>'+
+    '</br>'+
+    '<button type="submit" class="submitButton">Create</button>'+
+    '</form>'
+    
+    sidebar.appendChild(taskDialog);
+    const exitButton = taskDialog.querySelector('svg');
+    exitButton.addEventListener('click', () => {
+        const taskDialog = document.getElementById('taskDialog');
+        taskDialog.remove()
+    })
+    if (taskDialog) {
+        taskDialog.showModal();
+        const taskDueDateInput = taskDialog.querySelector("#taskDueDate")
+        taskDueDateInput.addEventListener('click', function(){
+        const datepicker = new Datepicker(taskDueDateInput, { 
+            // options
+        })});
+
+        const taskForm = document.getElementById('taskForm');
+        taskForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const taskName = document.getElementById('taskName').value;
+        const taskDescription = document.getElementById('taskDescription').value;
+        const taskDueDate = document.getElementById('taskDueDate').value;
+        // const myTask = new Task(taskName, taskDescription)
+        const isCompleted = false;
+        const taskData = { taskName, taskDescription, taskDueDate, isCompleted};
+        addTask(taskData);
+        taskDialog.remove();
+        location.reload();
+        });
+    return taskDialog
+}};
