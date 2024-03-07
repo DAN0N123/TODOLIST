@@ -146,6 +146,17 @@ export function createLoginForm(){
 };
 
 export function updateDisplayForUser(username){
+    const dialogDiv = document.querySelector('div .dialog');
+    dialogDiv.innerHTML = '<dialog id="rawCalendar">' +
+                            '<form id="calendarForm">' +
+                                '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">' +
+                                    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>' +
+                                '</svg>' +
+                                '<input type="text" id="dateInput" placeholder="Due Date" required="true" autocomplete="off"></input>' +
+                                '<br>' +
+                                '<button type="submit" class="submitButton">Filter</button>' +
+                            '</form>' +
+                        '</dialog>';
     const main_container = document.querySelector('.main');
     const sidebar = document.querySelector('.sidebar');
     const userBox = document.querySelector('.userBox');
@@ -191,7 +202,9 @@ export function updateDisplayForUser(username){
     userBox.appendChild(usernameDiv);
     userBox.style.marginBottom = '40%'
 
-    
+    const logo = document.querySelector('.logo');
+    logo.addEventListener('click', () => location.reload())
+    logo.style.cursor = 'pointer';
     
     // const testButton = document.createElement('button');
     // testButton.id = 'testButton';

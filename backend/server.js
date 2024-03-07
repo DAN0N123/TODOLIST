@@ -54,6 +54,23 @@ app.post('/createUser', async (req, res) => {
   }
 });
 
+app.get('/getProjects', async function(req,res) {
+  try {
+    const username = req.session.username;
+    const connection = await pool.getConnection();
+    const getUserQuery = 'SELECT projects FROM users WHERE username = ?';
+    const [userData] = await connection.execute(getUserQuery, [username]);
+    const currentProjectsJson = userData[0].projects;
+    const currentProjects = JSON.parse(currentProjectsJson);
+    res.json(currentProjects);
+    connection.release();
+  } catch (error) {
+    console.error('Error fetching user tasks:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 app.get('/logout', function(req, res) {
   req.session.destroy(function(err) {
     if (err) {

@@ -79,7 +79,24 @@ export async function addProject(projectData){
     console.error('Error adding task:', error);
   });
 };
-export async function displayTasksData(data) {
+
+export async function getProjects(){
+  try {
+    const response = await fetch('/getProjects');
+    if (!response.ok) {
+      throw new Error('Failed to fetch projects');
+    }
+    const currentProjects = await response.json();
+    return currentProjects;
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    throw error;
+  }
+  
+};
+
+
+export async function displayTasksData(data, mode) {
   try {
     const tasksData = data || await getUserTasks();
     const main_container = document.querySelector('.main');
@@ -201,17 +218,18 @@ export async function displayTasksData(data) {
       }
     }
 
+
     const mainSplit = document.createElement('div');
     mainSplit.classList.add('btn-group')
     mainSplit.innerHTML =
     '<div class="btn-group">'+
-      '<button type="button" class="btn splitBtn">Today</button>'+
+      `<button type="button" class="btn splitBtn">${mode || 'Today'}</button>`+
       '<button type="button" class="btn splitBtn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">'+
       '</button>'+
       '<ul class="dropdown-menu">'+
-        '<li><button class="dropdown-item">Projects</button></li>'+
-        '<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>'+
-        '<li><button class="dropdown-item">Filter by date</button></li>'+
+        '<li><button id="projectsButton" class="dropdown-item">Projects</button></li>'+
+        `<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>`+
+        `<li><button id="filterByDate" class="dropdown-item">Filter By Date</button></li>`+
         '<li><hr class="dropdown-divider"></li>'+
         '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
       '</ul>'+
@@ -241,6 +259,56 @@ export async function displayTasksData(data) {
   mainDisplay.appendChild(taskContainer);
   main_container.appendChild(mainDisplay);
 
+
+  // listeners after appending display to DOM
+
+
+  const projectsButton = document.getElementById('projectsButton');
+  projectsButton.addEventListener('click', async function(){
+    const currentProjects = await getProjects();
+    console.log(currentProjects);
+  })
+
+  const filterByDate = document.getElementById('filterByDate');
+  filterByDate.onclick = function(){
+    const calendarDialog = document.getElementById('rawCalendar');
+    calendarDialog.showModal()
+    const dateInput = document.getElementById('dateInput')
+    const datepicker = new Datepicker(dateInput, { 
+      // options
+    });
+    const calendarForm = document.getElementById('calendarForm')
+    calendarForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const taskData = await getUserTasks();
+      const filteredData = {};
+      const date = document.getElementById('dateInput').value
+      
+      for(const task in taskData){
+        if(taskData[task]['taskDueDate'] == `${date}`){
+          filteredData[task] = taskData[task];
+        }
+      }
+      displayTasksData(filteredData, `${date}`)
+      calendarDialog.remove();
+      const dialogDiv = document.querySelector('div .dialog');
+      dialogDiv.innerHTML = '<dialog id="rawCalendar">' +
+                            '<form id="calendarForm">' +
+                                '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">' +
+                                    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>' +
+                                '</svg>' +
+                                '<input type="text" id="dateInput" placeholder="Due Date" required="true" autocomplete="off"></input>' +
+                                '<br>' +
+                                '<button type="submit" class="submitButton">Filter</button>' +
+                            '</form>' +
+                        '</dialog>';
+      });
+    const exitButton = calendarDialog.querySelector('svg');
+    exitButton.addEventListener('click', function(){
+      calendarDialog.remove()
+    });
+  }
   const addTaskButton = document.getElementById('addTaskButton');
   addTaskButton.addEventListener('click', () => setTaskDialog())
 
@@ -259,8 +327,10 @@ export async function displayTasksData(data) {
         filteredData[task] = taskData[task];
       }
     }
-    displayTasksData(filteredData)
+    displayTasksData(filteredData, 'Today')
   })
+
+  //
 
   } catch (error) {
     console.error('Error:', error);
