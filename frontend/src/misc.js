@@ -96,19 +96,193 @@ export async function getProjects(){
 };
 
 
+export async function displayProjectsData(){
+  const projects = await getProjects()
+  const dataContainer = document.querySelector('.dataContainer')
+  dataContainer.innerHTML = '';
+  for(const project in projects){
+        const projectDiv = document.createElement('div');
+        const projectKey = project.split(' ').join('');
+        const tasks = projects[project];
+        projectDiv.classList.add('projectDiv');
+        const outerP = document.querySelector('.d-infline-flex') || document.createElement('p');
+        outerP.classList.add('d-inline-flex');
+        outerP.classList.add('gap-1');
+        const projectTasksOuterDiv = document.createElement('div');
+        projectTasksOuterDiv.classList.add('collapse');
+        projectTasksOuterDiv.id = `projectTasks${projectKey}`
+        const projectTasksDiv = document.createElement('div');
+        projectTasksDiv.classList.add('card');
+        projectTasksDiv.classList.add('card-body');
+        projectTasksDiv.classList.add('projectTasks')
+        projectTasksDiv.id = `#projectTasks${projectKey}`
+        projectTasksOuterDiv.appendChild(projectTasksDiv)
+        outerP.classList.add('projectMain');
+        const projectName = document.createElement('div');
+        projectName.classList.add('projectName')
+        // projectName.type = 'button';
+        projectName.id = `projectName${projectKey}`
+        projectName.setAttribute('data-bs-toggle', 'collapse');
+        projectName.setAttribute('data-bs-target', `#projectTasks${projectKey}`)
+        projectName.ariaExpanded = "false";
+        projectName.textContent = project;
+        outerP.innerHTML = '<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample"></button>'
+        outerP.appendChild(projectName);
+        projectDiv.appendChild(outerP);
+        projectDiv.appendChild(projectTasksOuterDiv);
+        const dataContainer = document.querySelector('.dataContainer')
+        dataContainer.appendChild(projectDiv);
+        for (const key in tasks) {
+          if (tasks.hasOwnProperty(key)) {
+            const value = tasks[key];
+            const taskDiv = document.createElement('div');
+            taskDiv.classList.add('taskDiv');
+            const outerP = document.querySelector('.d-infline-flex') || document.createElement('p');
+            outerP.classList.add('d-inline-flex');
+            outerP.classList.add('gap-1');
+            const taskDescriptionOuterDiv = document.createElement('div');
+            taskDescriptionOuterDiv.classList.add('collapse');
+            taskDescriptionOuterDiv.id = `TaskDescription${key}`
+            const taskDescriptionDiv = document.createElement('div');
+            taskDescriptionDiv.classList.add('card');
+            taskDescriptionDiv.classList.add('card-body');
+            taskDescriptionDiv.textContent = value['taskDescription']
+            taskDescriptionOuterDiv.appendChild(taskDescriptionDiv)
+            const taskMain = document.createElement('div');
+            taskMain.classList.add('taskMain');
+            const taskName = document.createElement('button');
+            taskName.classList.add('taskName')
+            taskName.type = 'button';
+            taskName.id = `TaskName${key}`
+            taskName.setAttribute('data-bs-toggle', 'collapse');
+            taskName.setAttribute('data-bs-target', `#TaskDescription${key}`)
+            taskName.ariaExpanded = "false";
+            taskName.textContent = value['taskName'];
+            if (document.getElementById('saveButton') === null){
+              const saveButton = document.createElement('button');
+              saveButton.textContent = 'SAVE';
+              saveButton.addEventListener('click', (event) => saveTaskUpdates(event.currentTarget, tasks))
+              saveButton.id = 'saveButton';
+              saveButton.classList.add('hide');
+              const projectDivCurrent = document.getElementById(`projectTasks${projectKey}`)
+              projectDivCurrent.appendChild(saveButton);
+            }
+            
+    
+            const taskDueDate = document.createElement('input');
+            taskDueDate.classList.add('taskDueDate')
+            taskDueDate.type = 'text'
+            taskDueDate.value = value['taskDueDate'];
+    
+            // function saveTaskUpdates(button, tasks){
+            //   button.classList.add('hide')
+            //   const currentTasks = tasks;
+            //   fetch('/saveTaskUpdates', {
+            //     method: 'POST',
+            //     headers: {
+            //       'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(currentTasks),
+            //   })
+            // }
+    
+            function pickImage(value){
+              return value['isCompleted'] ? ('data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="22" fill="#327FE9" class="bi bi-check-circle-fill" viewBox="0 0 16 16">' +
+              '<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>' +
+              '</svg>')) : ('data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="22" fill="#327FE9" class="bi bi-check-circle" viewBox="0 0 16 16">'+
+              '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>'+
+              '<path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>'+
+              '</svg>'))
+            }
+    
+            const taskCompletionImgDiv = document.createElement('div');
+            taskCompletionImgDiv.classList.add('taskImg');
+            const taskCompletionImg = document.createElement('img');
+            taskCompletionImg.src = pickImage(value)
+            taskCompletionImg.addEventListener('click', function(){
+              value['isCompleted'] = !value['isCompleted'];
+              this.src = pickImage(value)
+              const saveButton = document.getElementById('saveButton');
+              saveButton.classList.remove('hide');
+            })
+            taskCompletionImgDiv.appendChild(taskCompletionImg);
+            taskDueDate.addEventListener('change', function() {
+              value['dueDate'] = this.value;
+            });
+    
+            taskDueDate.addEventListener('click', function(){
+              const datepicker = new Datepicker(taskDueDate, {
+                dataDate: taskDueDate.value
+              });
+              const datepickerElement = document.querySelector('.view-switch');
+              datepickerElement.addEventListener('change', () =>{console.log('yo')})
+              const taskCollapse = document.querySelector(`#TaskDescription${this.id}`)
+              taskCollapse.classList.remove('show');
+              }); 
+            
+            
+    
+            taskName.addEventListener('click', function() {
+              const target = this.getAttribute('data-bs-target');
+              const allCollapse = document.querySelectorAll('.collapse');
+              allCollapse.forEach(collapse => {
+                  if (collapse.id !== target) {
+                      collapse.classList.remove('show');
+                  }
+              });
+          });
+    
+            taskMain.appendChild(taskName);
+            taskMain.appendChild(taskDueDate);
+            taskMain.appendChild(taskCompletionImgDiv);
+            outerP.appendChild(taskMain);
+            taskDiv.id = `Task-${key}`;
+            taskDiv.appendChild(outerP);
+            taskDiv.appendChild(taskDescriptionOuterDiv);
+            projectTasksDiv.appendChild(taskDiv);
+          }
+        }
+
+
+
+
+        
+
+  }
+
+}
+export async function chooseTaskData(data){
+  if(data){
+    const tasks = data;
+    return tasks
+  }else{
+        const taskData = await getUserTasks();
+        const filteredData = {};
+        const year = new Date().getFullYear();
+        const dayStr = String(new Date().getDate());
+        const day = ('' + dayStr).padStart(2, "0")
+        const monthStr = String(new Date().getMonth() + 1)
+        const month =  ('' + monthStr).padStart(2, "0");
+        for(const task in taskData){
+          if(taskData[task]['taskDueDate'] == `${month}/${day}/${year}`){
+            filteredData[task] = taskData[task];
+          }}
+      return filteredData
+    }}
+
 export async function displayTasksData(data, mode) {
   try {
-    const tasksData = data || await getUserTasks();
+    const tasks = await chooseTaskData(data);
     const main_container = document.querySelector('.main');
     main_container.innerHTML = '';
     const mainDisplay = document.createElement('div');
     mainDisplay.classList.add('mainDisplay')
     mainDisplay.style.cssText = 'width: 1100px; display: flex; flex-direction: column; align-items: space-around'
-    const taskContainer = document.createElement('div');
-    taskContainer.classList.add('taskContainer');
-    for (const key in tasksData) {
-      if (tasksData.hasOwnProperty(key)) {
-        const value = tasksData[key];
+    const dataContainer = document.createElement('div');
+    dataContainer.classList.add('dataContainer');
+    for (const key in tasks) {
+      if (tasks.hasOwnProperty(key)) {
+        const value = tasks[key];
         const taskDiv = document.createElement('div');
         taskDiv.classList.add('taskDiv');
         const outerP = document.querySelector('.d-infline-flex') || document.createElement('p');
@@ -135,7 +309,7 @@ export async function displayTasksData(data, mode) {
         if (document.getElementById('saveButton') === null){
           const saveButton = document.createElement('button');
           saveButton.textContent = 'SAVE';
-          saveButton.addEventListener('click', (event) => saveTaskUpdates(event.currentTarget, tasksData))
+          saveButton.addEventListener('click', (event) => saveTaskUpdates(event.currentTarget, tasks))
           saveButton.id = 'saveButton';
           saveButton.classList.add('hide');
           taskMain.appendChild(saveButton);
@@ -145,7 +319,7 @@ export async function displayTasksData(data, mode) {
         const taskDueDate = document.createElement('input');
         taskDueDate.classList.add('taskDueDate')
         taskDueDate.type = 'text'
-        // taskDueDate.id = `${key}`
+        taskDueDate.id = `${key}`
         taskDueDate.value = value['taskDueDate'];
 
         function saveTaskUpdates(button, tasks){
@@ -180,17 +354,21 @@ export async function displayTasksData(data, mode) {
           saveButton.classList.remove('hide');
         })
         taskCompletionImgDiv.appendChild(taskCompletionImg);
-        taskDueDate.addEventListener('change', function() {
+
+        taskDueDate.addEventListener('onChange', function() {
+          console.log('yo')
           value['dueDate'] = this.value;
         });
 
-        taskDueDate.addEventListener('click', function(){
-          const datepicker = new Datepicker(taskDueDate, {
-            dataDate: taskDueDate.value
-          });
-          const datepickerElement = document.querySelector('.view-switch');
-          datepickerElement.addEventListener('change', () =>{console.log('yo')})
-          const taskCollapse = document.querySelector(`#TaskDescription${this.id}`)
+        taskDueDate.addEventListener('click', function(event){
+          const datepickerElem = document.querySelector('.datepicker-dropdown');
+          if(!datepickerElem){
+            const datepicker = new Datepicker(taskDueDate, {
+              dataDate: taskDueDate.value
+            });
+          }else{datepickerElem.remove()}
+
+          const taskCollapse = document.querySelector(`#TaskDescription${event.target.id}`)
           taskCollapse.classList.remove('show');
           }); 
         
@@ -214,7 +392,7 @@ export async function displayTasksData(data, mode) {
         taskDiv.appendChild(outerP);
         taskDiv.appendChild(taskDescriptionOuterDiv);
         taskName.appendChild
-        taskContainer.appendChild(taskDiv);
+        dataContainer.appendChild(taskDiv);
       }
     }
 
@@ -228,6 +406,7 @@ export async function displayTasksData(data, mode) {
       '</button>'+
       '<ul class="dropdown-menu">'+
         '<li><button id="projectsButton" class="dropdown-item">Projects</button></li>'+
+        `<li><button id="tasksButton" class="dropdown-item">Tasks</button></li>`+ 
         `<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>`+
         `<li><button id="filterByDate" class="dropdown-item">Filter By Date</button></li>`+
         '<li><hr class="dropdown-divider"></li>'+
@@ -238,7 +417,7 @@ export async function displayTasksData(data, mode) {
 
     
 
-    if (taskContainer.childElementCount == 0){
+    if (dataContainer.childElementCount == 0){
       const defaultDiv = document.createElement('div');
       defaultDiv.style.position = 'absolute';
 
@@ -256,18 +435,21 @@ export async function displayTasksData(data, mode) {
   }
 
   
-  mainDisplay.appendChild(taskContainer);
+  mainDisplay.appendChild(dataContainer);
   main_container.appendChild(mainDisplay);
 
 
   // listeners after appending display to DOM
 
 
-  const projectsButton = document.getElementById('projectsButton');
-  projectsButton.addEventListener('click', async function(){
-    const currentProjects = await getProjects();
-    console.log(currentProjects);
+  const tasksButton = document.getElementById('tasksButton');
+  tasksButton.addEventListener('click', async function(){
+    const taskData = await getUserTasks();
+    displaytasks(taskData, 'Tasks')
   })
+
+  const projectsButton = document.getElementById('projectsButton');
+  projectsButton.addEventListener('click', () => displayProjectsData())
 
   const filterByDate = document.getElementById('filterByDate');
   filterByDate.onclick = function(){
@@ -290,7 +472,7 @@ export async function displayTasksData(data, mode) {
           filteredData[task] = taskData[task];
         }
       }
-      displayTasksData(filteredData, `${date}`)
+      displaytasks(filteredData, `${date}`)
       calendarDialog.remove();
       const dialogDiv = document.querySelector('div .dialog');
       dialogDiv.innerHTML = '<dialog id="rawCalendar">' +
@@ -313,22 +495,7 @@ export async function displayTasksData(data, mode) {
   addTaskButton.addEventListener('click', () => setTaskDialog())
 
   const tasksTodayButton = document.getElementById('tasksTodayButton');
-  tasksTodayButton.addEventListener('click', async function(){
-    const taskData = await getUserTasks();
-    const filteredData = {};
-    const year = new Date().getFullYear();
-    const dayStr = String(new Date().getDate());
-    const day = ('' + dayStr).padStart(2, "0")
-    const monthStr = String(new Date().getMonth() + 1)
-    const month =  ('' + monthStr).padStart(2, "0");
-    
-    for(const task in taskData){
-      if(taskData[task]['taskDueDate'] == `${month}/${day}/${year}`){
-        filteredData[task] = taskData[task];
-      }
-    }
-    displayTasksData(filteredData, 'Today')
-  })
+  tasksTodayButton.addEventListener('click', () => displaytasks())
 
   //
 
@@ -336,5 +503,4 @@ export async function displayTasksData(data, mode) {
     console.error('Error:', error);
   }
 }
-
 

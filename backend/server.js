@@ -60,8 +60,7 @@ app.get('/getProjects', async function(req,res) {
     const connection = await pool.getConnection();
     const getUserQuery = 'SELECT projects FROM users WHERE username = ?';
     const [userData] = await connection.execute(getUserQuery, [username]);
-    const currentProjectsJson = userData[0].projects;
-    const currentProjects = JSON.parse(currentProjectsJson);
+    const currentProjects= userData[0].projects;
     res.json(currentProjects);
     connection.release();
   } catch (error) {
@@ -179,6 +178,7 @@ app.post('/addTask', async (req, res, next) => {
   const currentTasks = JSON.parse(currentTasksJson);
   currentTasks[newTaskData.taskName] = newTaskData;
   const updatedTasksJson = JSON.stringify(currentTasks);
+  console.log(updatedTasksJson)
 
   try {
     const updateTasksQuery = 'UPDATE users SET tasks = ? WHERE username = ?';

@@ -1,5 +1,5 @@
 import { handleUserCreation, handleLoginFormSubmit } from "../../backend/sendUserData";
-import { logoutUser } from "./misc";
+import { getUserTasks, logoutUser } from "./misc";
 import { addTask } from "./misc";
 import { displayTasksData } from "./misc";
 import { addProject } from "./misc";
@@ -145,7 +145,7 @@ export function createLoginForm(){
     });
 };
 
-export function updateDisplayForUser(username){
+export async function updateDisplayForUser(username){
     const dialogDiv = document.querySelector('div .dialog');
     dialogDiv.innerHTML = '<dialog id="rawCalendar">' +
                             '<form id="calendarForm">' +
