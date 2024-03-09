@@ -98,9 +98,35 @@ export async function getProjects(){
 
 export async function displayProjectsData(){
   const projects = await getProjects()
-  const dataContainer = document.querySelector('.dataContainer')
+  const dataContainer = document.querySelector('.dataContainer') || document.createElement('div');
+  if(!dataContainer.classList.contains('dataContainer')){
+    dataContainer.classList.add('dataContainer')
+  }
   dataContainer.innerHTML = '';
+  const mainContainer = document.querySelector('.main')
+  mainContainer.innerHTML = ''
+
+  const mainSplit = document.createElement('div');
+    mainSplit.classList.add('btn-group')
+    mainSplit.innerHTML =
+    '<div class="btn-group">'+
+      `<button type="button" class="btn splitBtn">Projects</button>`+
+      '<button type="button" class="btn splitBtn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">'+
+      '</button>'+
+      '<ul class="dropdown-menu">'+
+        '<li><button id="projectsButton" class="dropdown-item">Projects</button></li>'+
+        `<li><button id="tasksButton" class="dropdown-item">Tasks</button></li>`+ 
+        `<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>`+
+        `<li><button id="filterByDate" class="dropdown-item">Filter By Date</button></li>`+
+        '<li><hr class="dropdown-divider"></li>'+
+        '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
+      '</ul>'+
+    '</div>'
+    mainContainer.appendChild(mainSplit);
+
+  mainContainer.appendChild(dataContainer)
   for(const project in projects){
+        
         const projectDiv = document.createElement('div');
         const projectKey = project.split(' ').join('');
         const tasks = projects[project];
@@ -120,7 +146,6 @@ export async function displayProjectsData(){
         outerP.classList.add('projectMain');
         const projectName = document.createElement('div');
         projectName.classList.add('projectName')
-        // projectName.type = 'button';
         projectName.id = `projectName${projectKey}`
         projectName.setAttribute('data-bs-toggle', 'collapse');
         projectName.setAttribute('data-bs-target', `#projectTasks${projectKey}`)
@@ -131,7 +156,19 @@ export async function displayProjectsData(){
         projectDiv.appendChild(outerP);
         projectDiv.appendChild(projectTasksOuterDiv);
         const dataContainer = document.querySelector('.dataContainer')
+
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'SAVE';
+        saveButton.addEventListener('click', function(event){
+          console.log(event.currentTarget)
+          }
+          )
+        saveButton.id = `saveButton${projectKey}`;
+        saveButton.classList.add('hide');
+        saveButton.classList.add('saveButton')
+        projectTasksDiv.appendChild(saveButton)
         dataContainer.appendChild(projectDiv);
+        
         for (const key in tasks) {
           if (tasks.hasOwnProperty(key)) {
             const value = tasks[key];
@@ -157,18 +194,8 @@ export async function displayProjectsData(){
             taskName.setAttribute('data-bs-toggle', 'collapse');
             taskName.setAttribute('data-bs-target', `#TaskDescription${key}`)
             taskName.ariaExpanded = "false";
-            taskName.textContent = value['taskName'];
-            if (document.getElementById('saveButton') === null){
-              const saveButton = document.createElement('button');
-              saveButton.textContent = 'SAVE';
-              saveButton.addEventListener('click', (event) => saveTaskUpdates(event.currentTarget, tasks))
-              saveButton.id = 'saveButton';
-              saveButton.classList.add('hide');
-              const projectDivCurrent = document.getElementById(`projectTasks${projectKey}`)
-              projectDivCurrent.appendChild(saveButton);
-            }
+            taskName.textContent = value['taskName']
             
-    
             const taskDueDate = document.createElement('input');
             taskDueDate.classList.add('taskDueDate')
             taskDueDate.type = 'text'
@@ -202,23 +229,24 @@ export async function displayProjectsData(){
             taskCompletionImg.addEventListener('click', function(){
               value['isCompleted'] = !value['isCompleted'];
               this.src = pickImage(value)
-              const saveButton = document.getElementById('saveButton');
+              const saveButton = document.getElementById(`saveButton${projectKey}`);
               saveButton.classList.remove('hide');
             })
             taskCompletionImgDiv.appendChild(taskCompletionImg);
-            taskDueDate.addEventListener('change', function() {
-              value['dueDate'] = this.value;
-            });
+
+
     
             taskDueDate.addEventListener('click', function(){
-              const datepicker = new Datepicker(taskDueDate, {
-                dataDate: taskDueDate.value
-              });
-              const datepickerElement = document.querySelector('.view-switch');
-              datepickerElement.addEventListener('change', () =>{console.log('yo')})
+              const datepickerMain = document.querySelector('.datepicker-main');
+              datepickerMain.addEventListener('click', function(event){
+                if(event.target.classList.contains('datepicker-cell')){
+                  value['dueDate'] = taskDueDate.value
+                }
+              })
+
               const taskCollapse = document.querySelector(`#TaskDescription${this.id}`)
               taskCollapse.classList.remove('show');
-              }); 
+            }); 
             
             
     
@@ -251,28 +279,25 @@ export async function displayProjectsData(){
   }
 
 }
-export async function chooseTaskData(data){
-  if(data){
-    const tasks = data;
-    return tasks
-  }else{
-        const taskData = await getUserTasks();
-        const filteredData = {};
-        const year = new Date().getFullYear();
-        const dayStr = String(new Date().getDate());
-        const day = ('' + dayStr).padStart(2, "0")
-        const monthStr = String(new Date().getMonth() + 1)
-        const month =  ('' + monthStr).padStart(2, "0");
-        for(const task in taskData){
-          if(taskData[task]['taskDueDate'] == `${month}/${day}/${year}`){
-            filteredData[task] = taskData[task];
-          }}
-      return filteredData
-    }}
+export async function chooseTaskData(){
+      const taskData = await getUserTasks();
+      const filteredData = {};
+      const year = new Date().getFullYear();
+      const dayStr = String(new Date().getDate());
+      const day = ('' + dayStr).padStart(2, "0")
+      const monthStr = String(new Date().getMonth() + 1)
+      const month =  ('' + monthStr).padStart(2, "0");
+      for(const task in taskData){
+        if(taskData[task]['taskDueDate'] == `${month}/${day}/${year}`){
+          filteredData[task] = taskData[task];
+        }}
+    // console.log(`Filtered data: ${filteredData}`)
+    return filteredData
+}
 
 export async function displayTasksData(data, mode) {
   try {
-    const tasks = await chooseTaskData(data);
+    const tasks = data || await chooseTaskData();
     const main_container = document.querySelector('.main');
     main_container.innerHTML = '';
     const mainDisplay = document.createElement('div');
@@ -306,21 +331,45 @@ export async function displayTasksData(data, mode) {
         taskName.setAttribute('data-bs-target', `#TaskDescription${key}`)
         taskName.ariaExpanded = "false";
         taskName.textContent = value['taskName'];
-        if (document.getElementById('saveButton') === null){
-          const saveButton = document.createElement('button');
-          saveButton.textContent = 'SAVE';
-          saveButton.addEventListener('click', (event) => saveTaskUpdates(event.currentTarget, tasks))
-          saveButton.id = 'saveButton';
-          saveButton.classList.add('hide');
-          taskMain.appendChild(saveButton);
-        }
-        
 
         const taskDueDate = document.createElement('input');
         taskDueDate.classList.add('taskDueDate')
         taskDueDate.type = 'text'
         taskDueDate.id = `${key}`
         taskDueDate.value = value['taskDueDate'];
+        taskDueDate.textContent = value['taskDueDate'];
+
+        
+
+        if (document.getElementById('saveButton') === null){
+          const saveButton = document.createElement('button');
+          const mode = document.querySelector('splitBtn').textContent
+          saveButton.textContent = 'SAVE';
+          saveButton.addEventListener('click', function(event){
+            if(mode != 'Projects'){
+              saveTaskUpdates(event.currentTarget, tasks)
+            }else{
+              console.log(event.currentTarget)
+            }
+            }
+            )
+          saveButton.id = 'saveButton';
+          saveButton.classList.add('hide');
+          if(mode != 'Projects'){
+            taskMain.appendChild(saveButton)
+          };
+        };
+
+        taskDueDate.addEventListener('click', function(){
+          const datepickerMain = document.querySelector('.datepicker-main');
+          datepickerMain.addEventListener('click', function(event){
+            if(event.target.classList.contains('datepicker-cell')){
+              value['taskDueDate'] = taskDueDate.value
+              const saveButton = document.getElementById('saveButton');
+              saveButton.classList.remove('hide');
+            }
+          })});
+        
 
         function saveTaskUpdates(button, tasks){
           button.classList.add('hide')
@@ -355,22 +404,9 @@ export async function displayTasksData(data, mode) {
         })
         taskCompletionImgDiv.appendChild(taskCompletionImg);
 
-        taskDueDate.addEventListener('onChange', function() {
-          console.log('yo')
-          value['dueDate'] = this.value;
-        });
+        
+        
 
-        taskDueDate.addEventListener('click', function(event){
-          const datepickerElem = document.querySelector('.datepicker-dropdown');
-          if(!datepickerElem){
-            const datepicker = new Datepicker(taskDueDate, {
-              dataDate: taskDueDate.value
-            });
-          }else{datepickerElem.remove()}
-
-          const taskCollapse = document.querySelector(`#TaskDescription${event.target.id}`)
-          taskCollapse.classList.remove('show');
-          }); 
         
         
 
@@ -413,39 +449,15 @@ export async function displayTasksData(data, mode) {
         '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
       '</ul>'+
     '</div>'
-    mainDisplay.appendChild(mainSplit);
+    main_container.appendChild(mainSplit);
 
     
 
-    if (dataContainer.childElementCount == 0){
-      const defaultDiv = document.createElement('div');
-      defaultDiv.style.position = 'absolute';
 
-      defaultDiv.style.cssText = "display: flex; flex-direction: column; align-items:center; position: absolute; left: 0; right: 0; top: 0; bottom: 30%; margin: auto; width:400px; height: 200px;"
-      const defaultImg = document.createElement('img');
-      defaultImg.src = defaultImgSrc;
-      defaultImg.style.width = '294px';
-      const defaultP = document.createElement('p');
-      defaultP.innerHTML = 'What do you have to do today?</br> Tasks added here will be automatically marked as due today'
-      defaultP.style.marginLeft = '5%'
-      defaultDiv.appendChild(defaultImg);
-      defaultDiv.appendChild(defaultP);
-      main_container.appendChild(defaultDiv);
-      return
-  }
-
-  
-  mainDisplay.appendChild(dataContainer);
-  main_container.appendChild(mainDisplay);
-
-
-  // listeners after appending display to DOM
-
-
-  const tasksButton = document.getElementById('tasksButton');
-  tasksButton.addEventListener('click', async function(){
+    const tasksButton = document.getElementById('tasksButton');
+    tasksButton.addEventListener('click', async function(){
     const taskData = await getUserTasks();
-    displaytasks(taskData, 'Tasks')
+    displayTasksData(taskData, 'Tasks')
   })
 
   const projectsButton = document.getElementById('projectsButton');
@@ -457,7 +469,7 @@ export async function displayTasksData(data, mode) {
     calendarDialog.showModal()
     const dateInput = document.getElementById('dateInput')
     const datepicker = new Datepicker(dateInput, { 
-      // options
+      clearButton: true,
     });
     const calendarForm = document.getElementById('calendarForm')
     calendarForm.addEventListener('submit', async function(event) {
@@ -472,7 +484,7 @@ export async function displayTasksData(data, mode) {
           filteredData[task] = taskData[task];
         }
       }
-      displaytasks(filteredData, `${date}`)
+      displayTasksData(filteredData, `${date}`)
       calendarDialog.remove();
       const dialogDiv = document.querySelector('div .dialog');
       dialogDiv.innerHTML = '<dialog id="rawCalendar">' +
@@ -495,10 +507,33 @@ export async function displayTasksData(data, mode) {
   addTaskButton.addEventListener('click', () => setTaskDialog())
 
   const tasksTodayButton = document.getElementById('tasksTodayButton');
-  tasksTodayButton.addEventListener('click', () => displaytasks())
+  tasksTodayButton.addEventListener('click', () => displayTasksData())
 
-  //
+    if (dataContainer.childElementCount == 0){
+      const defaultDiv = document.createElement('div');
+      defaultDiv.style.position = 'absolute';
 
+      defaultDiv.style.cssText = "display: flex; flex-direction: column; align-items:center; position: absolute; left: 0; right: 0; top: 0; bottom: 30%; margin: auto; width:400px; height: 200px;"
+      const defaultImg = document.createElement('img');
+      defaultImg.src = defaultImgSrc;
+      defaultImg.style.width = '294px';
+      const defaultP = document.createElement('p');
+      defaultP.innerHTML = 'What do you have to do today?</br> Tasks added here will be automatically marked as due today'
+      defaultP.style.marginLeft = '5%'
+      defaultDiv.appendChild(defaultImg);
+      defaultDiv.appendChild(defaultP);
+      main_container.appendChild(defaultDiv);
+      return
+  }
+
+  
+  mainDisplay.appendChild(dataContainer);
+  main_container.appendChild(mainDisplay);
+  const taskDueDate = document.querySelector('.taskDueDate')
+  const myDatepicker = new Datepicker(taskDueDate, {
+    clearButton: true,
+    todayHighlight: true,
+   });
   } catch (error) {
     console.error('Error:', error);
   }

@@ -264,15 +264,14 @@ export async function updateDisplayForUser(username){
     
     
 
-    
-    
-    
-    
-
 
     sidebar.addEventListener('click', function(event) {
         if (event.target.classList.contains('taskSidebarImg')) {
             const taskDialog = setTaskDialog();
+            const taskDueDateInput = document.getElementById('taskDueDate')
+            const datepicker = new Datepicker(taskDueDateInput, { 
+                // options
+    })
         };
         if (event.target.classList.contains('projectSidebarImg')) {
             const projectDialog = setProjectDialog();
@@ -342,6 +341,7 @@ export function setProjectDialog(){
     '<button type="submit" class="submitButton">Create</button>'+
     '</form>'
     sidebar.appendChild(projectDialog);
+    
     const exitButton = projectDialog.querySelector('svg');
     exitButton.addEventListener('click', () => {
         const projectDialog = document.getElementById('projectDialog');
@@ -394,6 +394,10 @@ export function setTaskDialog(){
     '</form>'
     
     sidebar.appendChild(taskDialog);
+    const taskDueDateInput = document.getElementById('taskDueDate')
+    const datepicker = new Datepicker(taskDueDateInput, { 
+        todayHighlight: true,
+    })
     const exitButton = taskDialog.querySelector('svg');
     exitButton.addEventListener('click', () => {
         const taskDialog = document.getElementById('taskDialog');
@@ -401,12 +405,6 @@ export function setTaskDialog(){
     })
     if (taskDialog) {
         taskDialog.showModal();
-        const taskDueDateInput = taskDialog.querySelector("#taskDueDate")
-        taskDueDateInput.addEventListener('click', function(){
-        const datepicker = new Datepicker(taskDueDateInput, { 
-            // options
-        })});
-
         const taskForm = document.getElementById('taskForm');
         taskForm.addEventListener('submit', function(event) {
         event.preventDefault();
