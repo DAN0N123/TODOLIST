@@ -7,6 +7,7 @@ import Datepicker from '/node_modules/vanillajs-datepicker/js/Datepicker.js';
 import 'vanillajs-datepicker/css/datepicker.css';
 
 
+
 export default function createUserCreationForm(){
     const main_container = document.querySelector('.main');
     main_container.innerHTML = '';
@@ -265,7 +266,7 @@ export async function updateDisplayForUser(username){
     
 
 
-    sidebar.addEventListener('click', function(event) {
+    sidebar.addEventListener('click', async function(event) {
         if (event.target.classList.contains('taskSidebarImg')) {
             const taskDialog = setTaskDialog();
             const taskDueDateInput = document.getElementById('taskDueDate')
@@ -274,7 +275,8 @@ export async function updateDisplayForUser(username){
     })
         };
         if (event.target.classList.contains('projectSidebarImg')) {
-            const projectDialog = setProjectDialog();
+            const tasks = await getUserTasks()
+            const projectDialog = setProjectDialog(tasks);
         }
     });
 
@@ -296,6 +298,7 @@ export async function updateDisplayForUser(username){
     });
     
     
+
     // display tasks
     displayTasksData()
 }
@@ -322,7 +325,10 @@ export function setInitialUserBox(){
 };
 
 
-export function setProjectDialog(){
+
+export function setProjectDialog(tasks){
+    
+    
     const projectDialog = document.createElement('dialog');
     const sidebar = document.querySelector('.sidebar')
     projectDialog.setAttribute('id', 'projectDialog');
@@ -334,7 +340,7 @@ export function setProjectDialog(){
     '</svg>'+
     '<label for="taskSelection">Select tasks for project:</label>'+
     '<multi-checkbox id="taskSelection" separator="," value="">'+
-    '<ul id="multiCheckbox" slot="check-values">'+
+    '<ul slot="check-values" id="multiCheckbox">'+
     '</ul>'+
     '</multi-checkbox>'+
     '</br>'+
@@ -347,30 +353,30 @@ export function setProjectDialog(){
         const projectDialog = document.getElementById('projectDialog');
         projectDialog.remove()
     })
-    const task_container = document.querySelector('.taskContainer');
-    const multiCheckbox = document.getElementById('multiCheckbox');
-    for(const child of task_container.children){
-        if(child.classList.contains('taskDiv')){
-            const taskName = child.querySelector('.taskName').textContent;
-            const li = document.createElement('li');
-            li.textContent = taskName;
-            multiCheckbox.appendChild(li)
-        }
-    }
-    if (projectDialog) {
-        projectDialog.showModal();
 
-        const projectForm = document.getElementById('projectForm');
-        projectForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const projectName = document.getElementById('projectName').value;
-        const taskSelection = document.getElementById('taskSelection').value.split(',')
-        const projectData = {'name' : projectName, 'tasks' : taskSelection};
-        addProject(projectData)
-        projectDialog.remove();
-        location.reload();
-        });
+
+    const multiCheckbox = document.getElementById('multiCheckbox');
+    
+    for(const task in tasks){
+        const li = document.createElement('li');
+        li.textContent = task;
+        multiCheckbox.appendChild(li);
     }
+
+    projectDialog.showModal();
+
+    const projectForm = document.getElementById('projectForm');
+    projectForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const projectName = document.getElementById('projectName').value;
+    const taskSelection = document.getElementById('taskSelection').value.split(',')
+
+    const projectData = {'name' : projectName, 'tasks' : taskSelection};
+    addProject(projectData)
+    projectDialog.remove();
+    // location.reload();
+    });
+    
     return projectDialog
 }
 

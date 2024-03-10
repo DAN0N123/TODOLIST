@@ -195,17 +195,13 @@ app.post('/addProject', async (req,res,next) => {
   const connection = await pool.getConnection()
   const name = req.body.name;
   const tasks = req.body.tasks;
-  const getTaskQuery = 'SELECT tasks FROM users WHERE username = ?';
-  const userTasks = await connection.execute(getTaskQuery, [username]);
-  const userTasksParsed = JSON.parse(userTasks[0][0].tasks);
-  const projectTasks = {};
-  tasks.forEach( (task) => {
-    projectTasks[task] = userTasksParsed[task]} );
   const getProjectQuery = 'SELECT projects FROM users WHERE username = ?'
   const [projectData] = await connection.execute(getProjectQuery, [username]);
-  const currentProjects = projectData[0]['projects'] || JSON.stringify({});
-  currentProjects[name] = projectTasks;
+  const currentProjects = projectData[0]['projects'] || {}
+  currentProjects[name] = tasks;
+  
   const currentProjectsUpdated = JSON.stringify(currentProjects);
+  console.log(currentProjectsUpdated)
   try{
   const addProjectQuery = 'UPDATE users SET projects = ? WHERE username = ?'
   await connection.execute(addProjectQuery, [currentProjectsUpdated, username])
@@ -217,6 +213,33 @@ app.post('/addProject', async (req,res,next) => {
   
 }
 );
+
+app.post('/update_specific', async (req, res) => {
+  try {
+    const username = req.session.username;
+    const connection = await pool.getConnection();
+    const updatedTasks = req.body;
+
+    // Fetching current tasks from the database
+    const getUserQuery = 'SELECT tasks FROM users WHERE username = ?';
+    const [userData] = await connection.execute(getUserQuery, [username]);
+    const currentTasksJson = userData[0].tasks;
+    const currentTasks = JSON.parse(currentTasksJson);
+
+    // Merging updated tasks with current tasks
+    Object.assign(currentTasks, updatedTasks);
+
+    // Updating tasks in the database
+    const updateQuery = 'UPDATE users SET tasks = ? WHERE username = ?';
+    await connection.execute(updateQuery, [JSON.stringify(currentTasks), username]);
+    connection.release()
+    res.status(200).json({ message: 'Tasks updated successfully' });
+  } catch (error) {
+    console.error('Error updating tasks:', error);
+    res.status(500).json({ error: 'Internal Server Error' });}
+  
+});
+
 
 app.get('/user_tasks', async (req, res) => {
   try {

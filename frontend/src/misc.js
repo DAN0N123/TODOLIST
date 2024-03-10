@@ -95,6 +95,18 @@ export async function getProjects(){
   
 };
 
+export async function updateSpecific(updatedTasks){
+  fetch('/update_specific', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updatedTasks),
+  })
+  .catch(error => {
+    console.error('Error adding task:', error);
+  });
+}
 
 export async function displayProjectsData(){
   const projects = await getProjects()
@@ -129,7 +141,16 @@ export async function displayProjectsData(){
         
         const projectDiv = document.createElement('div');
         const projectKey = project.split(' ').join('');
-        const tasks = projects[project];
+        const taskIds = projects[project];
+        const userTasks = await getUserTasks()
+        let tasks = {};
+        for(const taskId in taskIds){
+          if(userTasks[taskId] != undefined){
+            tasks[taskId] = userTasks[taskId]
+          }
+          
+        }
+        console.log(tasks)
         projectDiv.classList.add('projectDiv');
         const outerP = document.querySelector('.d-infline-flex') || document.createElement('p');
         outerP.classList.add('d-inline-flex');
@@ -160,7 +181,7 @@ export async function displayProjectsData(){
         const saveButton = document.createElement('button');
         saveButton.textContent = 'SAVE';
         saveButton.addEventListener('click', function(event){
-          console.log(event.currentTarget)
+            updateSpecific(tasks)
           }
           )
         saveButton.id = `saveButton${projectKey}`;
@@ -340,10 +361,11 @@ export async function displayTasksData(data, mode) {
         taskDueDate.textContent = value['taskDueDate'];
 
         
+        
 
         if (document.getElementById('saveButton') === null){
           const saveButton = document.createElement('button');
-          const mode = document.querySelector('splitBtn').textContent
+          const mode = mode || 'Today'
           saveButton.textContent = 'SAVE';
           saveButton.addEventListener('click', function(event){
             if(mode != 'Projects'){
@@ -433,25 +455,25 @@ export async function displayTasksData(data, mode) {
     }
 
 
-    const mainSplit = document.createElement('div');
-    mainSplit.classList.add('btn-group')
-    mainSplit.innerHTML =
-    '<div class="btn-group">'+
-      `<button type="button" class="btn splitBtn">${mode || 'Today'}</button>`+
-      '<button type="button" class="btn splitBtn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">'+
-      '</button>'+
-      '<ul class="dropdown-menu">'+
-        '<li><button id="projectsButton" class="dropdown-item">Projects</button></li>'+
-        `<li><button id="tasksButton" class="dropdown-item">Tasks</button></li>`+ 
-        `<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>`+
-        `<li><button id="filterByDate" class="dropdown-item">Filter By Date</button></li>`+
-        '<li><hr class="dropdown-divider"></li>'+
-        '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
-      '</ul>'+
-    '</div>'
-    main_container.appendChild(mainSplit);
-
     
+
+    const mainSplit = document.createElement('div');
+        mainSplit.classList.add('btn-group')
+        mainSplit.innerHTML =
+        '<div class="btn-group">'+
+          `<button type="button" class="btn splitBtn">${mode || 'Today'}</button>`+
+          '<button type="button" class="btn splitBtn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">'+
+          '</button>'+
+          '<ul class="dropdown-menu">'+
+            '<li><button id="projectsButton" class="dropdown-item">Projects</button></li>'+
+            `<li><button id="tasksButton" class="dropdown-item">Tasks</button></li>`+ 
+            `<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>`+
+            `<li><button id="filterByDate" class="dropdown-item">Filter By Date</button></li>`+
+            '<li><hr class="dropdown-divider"></li>'+
+            '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
+          '</ul>'+
+        '</div>'
+        main_container.appendChild(mainSplit);
 
 
     const tasksButton = document.getElementById('tasksButton');
