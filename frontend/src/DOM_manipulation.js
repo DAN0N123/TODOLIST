@@ -370,7 +370,6 @@ export function setProjectDialog(tasks){
     event.preventDefault();
     const projectName = document.getElementById('projectName').value;
     const taskSelection = document.getElementById('taskSelection').value.split(',')
-
     const projectData = {'name' : projectName, 'tasks' : taskSelection};
     addProject(projectData)
     projectDialog.remove();

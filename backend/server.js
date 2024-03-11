@@ -190,6 +190,24 @@ app.post('/addTask', async (req, res, next) => {
   }
 })
 
+app.post('/removeTask', async (req, res, next) => {
+  const username = req.session.username
+  const connection = pool.getConnection()
+  const taskName = req.body
+  console.log(`Task name: ${taskName}`)
+  try{
+    const deleteTaskQuery = `DELETE FROM users WHERE username = ? AND JSON_CONTAINS(tasks, '{"taskName": ?}')`;
+    await connection.execute(deleteTaskQuery, [username, taskName])
+    }catch (error) {
+      console.error('Error removing task:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }finally{
+      console.log('task succesfully deleted')
+      connection.release()
+      next()
+    }
+})
+
 app.post('/addProject', async (req,res,next) => {
   const username = req.session.username;
   const connection = await pool.getConnection()
@@ -201,7 +219,7 @@ app.post('/addProject', async (req,res,next) => {
   currentProjects[name] = tasks;
   
   const currentProjectsUpdated = JSON.stringify(currentProjects);
-  console.log(currentProjectsUpdated)
+  console.log(`Current projects updated: ${currentProjectsUpdated}`)
   try{
   const addProjectQuery = 'UPDATE users SET projects = ? WHERE username = ?'
   await connection.execute(addProjectQuery, [currentProjectsUpdated, username])
@@ -210,7 +228,6 @@ app.post('/addProject', async (req,res,next) => {
     connection.release()
     next()
   }
-  
 }
 );
 

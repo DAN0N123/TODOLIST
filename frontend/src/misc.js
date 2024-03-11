@@ -108,21 +108,63 @@ export async function updateSpecific(updatedTasks){
   });
 }
 
-export async function displayProjectsData(){
-  const projects = await getProjects()
-  const dataContainer = document.querySelector('.dataContainer') || document.createElement('div');
-  if(!dataContainer.classList.contains('dataContainer')){
-    dataContainer.classList.add('dataContainer')
-  }
-  dataContainer.innerHTML = '';
+
+export async function deleteTask(task){
+  fetch('/removeTask', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(task),
+    
+  })
+  .catch(error => {
+    console.error('Error adding task:', error);
+  });
+}
+
+function createTopLevelButtons(mode){
   const mainContainer = document.querySelector('.main')
-  mainContainer.innerHTML = ''
+  const topLevelButtons = document.createElement('div');
+  topLevelButtons.style.cssText = 'display: flex; gap: 100px'
+  const editModeButton = document.createElement('div');
+  editModeButton.style.borderColor = '#757575'
+  editModeButton.id = 'editModeButton'
+  const editImage = document.createElement('div');
+  editImage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="black" class="bi bi-pen" viewBox="0 0 16 16">'+
+                        '<path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>'+
+                        '</svg>'
+  editModeButton.appendChild(editImage);
+  editModeButton.addEventListener('click', (event) => {
+    const trashcans = document.querySelectorAll('.deleteImg')
+    if (!event.target.classList.contains('active')){
+      event.target.classList.add('active')
+      editImage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#2F7FE8" class="bi bi-pen" viewBox="0 0 16 16">'+
+      '<path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>'+
+      '</svg>'
+      trashcans.forEach( trashcan => {
+        trashcan.classList.remove('hide')
+      })
+    }else{
+      event.target.classList.remove('active')
+      editImage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="black" class="bi bi-pen" viewBox="0 0 16 16">'+
+                        '<path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>'+
+                        '</svg>'
+      trashcans.forEach( trashcan => {
+        trashcan.classList.add('hide')
+      })
+    }
+  })
+  // const editText =  document.createElement('p');
+  // editText.style.margin = '0'
+  // editText.textContent = 'EDIT';
+  // editModeButton.appendChild(editText)
 
   const mainSplit = document.createElement('div');
     mainSplit.classList.add('btn-group')
     mainSplit.innerHTML =
     '<div class="btn-group">'+
-      `<button type="button" class="btn splitBtn">Projects</button>`+
+      `<button type="button" class="btn splitBtn">${mode}</button>`+
       '<button type="button" class="btn splitBtn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">'+
       '</button>'+
       '<ul class="dropdown-menu">'+
@@ -134,7 +176,79 @@ export async function displayProjectsData(){
         '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
       '</ul>'+
     '</div>'
-    mainContainer.appendChild(mainSplit);
+    topLevelButtons.appendChild(mainSplit);
+    topLevelButtons.appendChild(editModeButton);
+    mainContainer.appendChild(topLevelButtons);
+    const tasksButton = document.getElementById('tasksButton');
+    tasksButton.addEventListener('click', async function(){
+    const taskData = await getUserTasks();
+    displayTasksData(taskData, 'Tasks')
+  })
+
+  const projectsButton = document.getElementById('projectsButton');
+  projectsButton.addEventListener('click', () => displayProjectsData())
+  const filterByDate = document.getElementById('filterByDate');
+
+  filterByDate.addEventListener('click', function(){
+    const calendarDialog = document.getElementById('rawCalendar');
+    calendarDialog.parentElement.classList.remove('hide')
+    calendarDialog.showModal()
+
+    const dateInput = document.getElementById('dateInput')
+    const datepicker = new Datepicker(dateInput, { 
+      clearButton: true,
+    });
+    const calendarForm = document.getElementById('calendarForm')
+    calendarForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      calendarDialog.parentElement.classList.add('hide')
+      const taskData = await getUserTasks();
+      const filteredData = {};
+      const date = document.getElementById('dateInput').value
+      
+      for(const task in taskData){
+        if(taskData[task]['taskDueDate'] == `${date}`){
+          filteredData[task] = taskData[task];
+        }
+      }
+      displayTasksData(filteredData, `${date}`)
+      calendarDialog.remove();
+      const dialogDiv = document.querySelector('div .dialog');
+      dialogDiv.innerHTML = '<dialog id="rawCalendar">' +
+                            '<form id="calendarForm">' +
+                                '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">' +
+                                    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>' +
+                                '</svg>' +
+                                '<input type="text" id="dateInput" placeholder="Due Date" required="true" autocomplete="off"></input>' +
+                                '<br>' +
+                                '<button type="submit" class="submitButton">Filter</button>' +
+                            '</form>' +
+                        '</dialog>';
+      });
+    const exitButton = calendarDialog.querySelector('svg');
+    exitButton.addEventListener('click', function(){
+      calendarDialog.remove()
+    });
+  });
+  const addTaskButton = document.getElementById('addTaskButton');
+  addTaskButton.addEventListener('click', () => setTaskDialog())
+
+  const tasksTodayButton = document.getElementById('tasksTodayButton');
+  tasksTodayButton.addEventListener('click', () => displayTasksData())
+}
+
+
+export async function displayProjectsData(){
+  const projects = await getProjects()
+  const dataContainer = document.querySelector('.dataContainer') || document.createElement('div');
+  if(!dataContainer.classList.contains('dataContainer')){
+    dataContainer.classList.add('dataContainer')
+  }
+  dataContainer.innerHTML = '';
+  const mainContainer = document.querySelector('.main')
+  mainContainer.innerHTML = ''
+
+  createTopLevelButtons('Projects')
 
   mainContainer.appendChild(dataContainer)
   for(const project in projects){
@@ -144,13 +258,11 @@ export async function displayProjectsData(){
         const taskIds = projects[project];
         const userTasks = await getUserTasks()
         let tasks = {};
-        for(const taskId in taskIds){
-          if(userTasks[taskId] != undefined){
-            tasks[taskId] = userTasks[taskId]
+        for(const taskName of taskIds){
+          if(userTasks[taskName] != undefined){
+            tasks[taskName] = userTasks[taskName]
           }
-          
-        }
-        console.log(tasks)
+        };
         projectDiv.classList.add('projectDiv');
         const outerP = document.querySelector('.d-infline-flex') || document.createElement('p');
         outerP.classList.add('d-inline-flex');
@@ -288,6 +400,18 @@ export async function displayProjectsData(){
             taskDiv.id = `Task-${key}`;
             taskDiv.appendChild(outerP);
             taskDiv.appendChild(taskDescriptionOuterDiv);
+            const deleteImg = document.createElement('div');
+            deleteImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#E42328" class="bi bi-trash3-fill" viewBox="0 0 16 16">'+
+                                  '<path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>'+
+                                  '</svg>' 
+            deleteImg.classList.add('deleteImg');
+            deleteImg.classList.add('hide');
+            deleteImg.addEventListener('click', function(event){
+              const taskName = event.target.parentElement.parentElement.id.replace('Task-', '')
+              console.log(taskName)
+              deleteTask(taskName)
+            })
+            taskDiv.appendChild(deleteImg)
             projectTasksDiv.appendChild(taskDiv);
           }
         }
@@ -312,7 +436,6 @@ export async function chooseTaskData(){
         if(taskData[task]['taskDueDate'] == `${month}/${day}/${year}`){
           filteredData[task] = taskData[task];
         }}
-    // console.log(`Filtered data: ${filteredData}`)
     return filteredData
 }
 
@@ -359,8 +482,6 @@ export async function displayTasksData(data, mode) {
         taskDueDate.id = `${key}`
         taskDueDate.value = value['taskDueDate'];
         taskDueDate.textContent = value['taskDueDate'];
-
-        
         
 
         if (document.getElementById('saveButton') === null){
@@ -383,7 +504,9 @@ export async function displayTasksData(data, mode) {
         };
 
         taskDueDate.addEventListener('click', function(){
-          const datepickerMain = document.querySelector('.datepicker-main');
+          const datepickerParent = document.getElementById(`Task-${key}`);
+          const datepickerMain = datepickerParent.querySelector('.datepicker-main')
+          console.log(datepickerMain)
           datepickerMain.addEventListener('click', function(event){
             if(event.target.classList.contains('datepicker-cell')){
               value['taskDueDate'] = taskDueDate.value
@@ -449,7 +572,18 @@ export async function displayTasksData(data, mode) {
         taskDiv.id = `Task-${key}`;
         taskDiv.appendChild(outerP);
         taskDiv.appendChild(taskDescriptionOuterDiv);
-        taskName.appendChild
+        const deleteImg = document.createElement('div');
+        deleteImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#E42328" class="bi bi-trash3-fill" viewBox="0 0 16 16">'+
+                              '<path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>'+
+                              '</svg>' 
+        deleteImg.classList.add('deleteImg')
+        deleteImg.classList.add('hide')
+        deleteImg.addEventListener('click', function(event){
+          const taskName = event.target.parentElement.parentElement.parentElement.id.replace('Task-', '')
+          console.log(taskName)
+          deleteTask(taskName)
+        })
+        taskMain.appendChild(deleteImg)
         dataContainer.appendChild(taskDiv);
       }
     }
@@ -457,79 +591,7 @@ export async function displayTasksData(data, mode) {
 
     
 
-    const mainSplit = document.createElement('div');
-        mainSplit.classList.add('btn-group')
-        mainSplit.innerHTML =
-        '<div class="btn-group">'+
-          `<button type="button" class="btn splitBtn">${mode || 'Today'}</button>`+
-          '<button type="button" class="btn splitBtn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">'+
-          '</button>'+
-          '<ul class="dropdown-menu">'+
-            '<li><button id="projectsButton" class="dropdown-item">Projects</button></li>'+
-            `<li><button id="tasksButton" class="dropdown-item">Tasks</button></li>`+ 
-            `<li><button id="tasksTodayButton" class="dropdown-item">Today</button></li>`+
-            `<li><button id="filterByDate" class="dropdown-item">Filter By Date</button></li>`+
-            '<li><hr class="dropdown-divider"></li>'+
-            '<li><button id="addTaskButton" class="dropdown-item">Add new task</button></li>'+
-          '</ul>'+
-        '</div>'
-        main_container.appendChild(mainSplit);
-
-
-    const tasksButton = document.getElementById('tasksButton');
-    tasksButton.addEventListener('click', async function(){
-    const taskData = await getUserTasks();
-    displayTasksData(taskData, 'Tasks')
-  })
-
-  const projectsButton = document.getElementById('projectsButton');
-  projectsButton.addEventListener('click', () => displayProjectsData())
-
-  const filterByDate = document.getElementById('filterByDate');
-  filterByDate.onclick = function(){
-    const calendarDialog = document.getElementById('rawCalendar');
-    calendarDialog.showModal()
-    const dateInput = document.getElementById('dateInput')
-    const datepicker = new Datepicker(dateInput, { 
-      clearButton: true,
-    });
-    const calendarForm = document.getElementById('calendarForm')
-    calendarForm.addEventListener('submit', async function(event) {
-      event.preventDefault();
-
-      const taskData = await getUserTasks();
-      const filteredData = {};
-      const date = document.getElementById('dateInput').value
-      
-      for(const task in taskData){
-        if(taskData[task]['taskDueDate'] == `${date}`){
-          filteredData[task] = taskData[task];
-        }
-      }
-      displayTasksData(filteredData, `${date}`)
-      calendarDialog.remove();
-      const dialogDiv = document.querySelector('div .dialog');
-      dialogDiv.innerHTML = '<dialog id="rawCalendar">' +
-                            '<form id="calendarForm">' +
-                                '<svg xmlns="http://www.w3.org/2000/svg" width="25" fill="#327FE9" class="bi bi-x" viewBox="0 0 16 16">' +
-                                    '<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>' +
-                                '</svg>' +
-                                '<input type="text" id="dateInput" placeholder="Due Date" required="true" autocomplete="off"></input>' +
-                                '<br>' +
-                                '<button type="submit" class="submitButton">Filter</button>' +
-                            '</form>' +
-                        '</dialog>';
-      });
-    const exitButton = calendarDialog.querySelector('svg');
-    exitButton.addEventListener('click', function(){
-      calendarDialog.remove()
-    });
-  }
-  const addTaskButton = document.getElementById('addTaskButton');
-  addTaskButton.addEventListener('click', () => setTaskDialog())
-
-  const tasksTodayButton = document.getElementById('tasksTodayButton');
-  tasksTodayButton.addEventListener('click', () => displayTasksData())
+    createTopLevelButtons(mode || 'Today')
 
     if (dataContainer.childElementCount == 0){
       const defaultDiv = document.createElement('div');
@@ -551,11 +613,14 @@ export async function displayTasksData(data, mode) {
   
   mainDisplay.appendChild(dataContainer);
   main_container.appendChild(mainDisplay);
-  const taskDueDate = document.querySelector('.taskDueDate')
-  const myDatepicker = new Datepicker(taskDueDate, {
-    clearButton: true,
-    todayHighlight: true,
-   });
+  const taskDueDate = document.querySelectorAll('.taskDueDate')
+  taskDueDate.forEach((element) => {
+    const myDatepicker = new Datepicker(element, {
+      clearButton: true,
+      todayHighlight: true,
+     })
+  });
+  
   } catch (error) {
     console.error('Error:', error);
   }
