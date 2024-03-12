@@ -1,5 +1,5 @@
 import { handleUserCreation, handleLoginFormSubmit } from "../../backend/sendUserData";
-import { getUserTasks, logoutUser } from "./misc";
+import { getUserTasks, logoutUser, remove_project } from "./misc";
 import { addTask } from "./misc";
 import { displayTasksData } from "./misc";
 import { addProject } from "./misc";
@@ -207,10 +207,11 @@ export async function updateDisplayForUser(username){
     logo.addEventListener('click', () => location.reload())
     logo.style.cursor = 'pointer';
     
-    // const testButton = document.createElement('button');
-    // testButton.id = 'testButton';
-    // testButton.addEventListener('click', () => )
-    // sidebar.appendChild(testButton);
+    const testButton = document.createElement('button');
+    testButton.id = 'testButton';
+    testButton.textContent = 'TEST'
+    testButton.addEventListener('click', () => remove_project('asdasdasd'))
+    sidebar.appendChild(testButton);
     
     
 

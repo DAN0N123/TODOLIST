@@ -190,21 +190,51 @@ app.post('/addTask', async (req, res, next) => {
   }
 })
 
-app.post('/removeTask', async (req, res, next) => {
+app.post('/remove_project', async (req,res,next) => {
   const username = req.session.username
-  const connection = pool.getConnection()
-  const taskName = req.body
-  console.log(`Task name: ${taskName}`)
+  const connection = await pool.getConnection()
+  const { projectName } = req.body
+  console.log(projectName)
+  const getProjectQuery = 'SELECT projects FROM users WHERE username = ?'
+  const [projectData] = await connection.execute(getProjectQuery, [username]);
+  const currentProjects = projectData[0]['projects'];
+  delete currentProjects[projectName]
+  console.log(currentProjects)
   try{
-    const deleteTaskQuery = `DELETE FROM users WHERE username = ? AND JSON_CONTAINS(tasks, '{"taskName": ?}')`;
-    await connection.execute(deleteTaskQuery, [username, taskName])
+    const addProjectQuery = 'UPDATE users SET projects = ? WHERE username = ?'
+    await connection.execute(addProjectQuery, [currentProjects, username])
+    }catch (error){
+      console.log(`Error deleting project ${error}`)
+    }
+    finally{
+      connection.release()
+      next()
+  }
+})
+
+
+app.post('/remove_task', async (req, res, next) => {
+  const username = req.session.username
+  const connection = await pool.getConnection();
+
+  const { taskName }= req.body;
+  
+
+  const getUserQuery = 'SELECT tasks FROM users WHERE username = ?';
+  const [userData] = await connection.execute(getUserQuery, [username]);
+  const currentTasksJson = userData[0].tasks;
+  const currentTasks = JSON.parse(currentTasksJson);
+  delete currentTasks[taskName]
+  console.log(currentTasks)
+
+  try{
+    const updateQuery = 'UPDATE users SET tasks = ? WHERE username = ?';
+    await connection.execute(updateQuery, [JSON.stringify(currentTasks), username]);
     }catch (error) {
       console.error('Error removing task:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }finally{
-      console.log('task succesfully deleted')
       connection.release()
-      next()
     }
 })
 

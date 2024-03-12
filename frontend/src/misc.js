@@ -108,14 +108,26 @@ export async function updateSpecific(updatedTasks){
   });
 }
 
-
-export async function deleteTask(task){
-  fetch('/removeTask', {
+export async function remove_project(project){
+  fetch('/remove_project', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(task),
+    body: JSON.stringify({projectName: project}),
+  })
+  .catch(error => {
+    console.error('Error adding task:', error);
+  });
+}
+
+export async function deleteTask(task){
+  fetch('/remove_task', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ taskName: task }),
     
   })
   .catch(error => {
@@ -234,8 +246,11 @@ function createTopLevelButtons(mode){
   addTaskButton.addEventListener('click', () => setTaskDialog())
 
   const tasksTodayButton = document.getElementById('tasksTodayButton');
-  tasksTodayButton.addEventListener('click', () => displayTasksData())
-}
+  tasksTodayButton.addEventListener('click', async function(){ 
+    const tasksToday = await getTaskDataToday()
+    displayTasksData(tasksToday, 'Today')
+  });
+};
 
 
 export async function displayProjectsData(){
@@ -294,6 +309,7 @@ export async function displayProjectsData(){
         saveButton.textContent = 'SAVE';
         saveButton.addEventListener('click', function(event){
             updateSpecific(tasks)
+            this.classList.add('hide')
           }
           )
         saveButton.id = `saveButton${projectKey}`;
@@ -367,18 +383,25 @@ export async function displayProjectsData(){
             })
             taskCompletionImgDiv.appendChild(taskCompletionImg);
 
-
+            const taskDueDates = document.querySelectorAll('.taskDueDate')
+            taskDueDates.forEach((element) => {
+              const myDatepicker = new Datepicker(element, {
+                clearButton: true,
+                todayHighlight: true,
+              })
+            });
     
             taskDueDate.addEventListener('click', function(){
-              const datepickerMain = document.querySelector('.datepicker-main');
+              const datepickerParent = document.getElementById(`Task-${key}`);
+              const datepickerMain = datepickerParent.querySelector('.datepicker-main')
               datepickerMain.addEventListener('click', function(event){
-                if(event.target.classList.contains('datepicker-cell')){
-                  value['dueDate'] = taskDueDate.value
+                if(event.target.classList.contains('datepicker-cell')){ 
+                  value['taskDueDate'] = taskDueDate.value
+                  const saveButton = document.getElementById(`saveButton${projectKey}`);
+                  console.log(saveButton)
+                  saveButton.classList.remove('hide');
                 }
-              })
-
-              const taskCollapse = document.querySelector(`#TaskDescription${this.id}`)
-              taskCollapse.classList.remove('show');
+            });
             }); 
             
             
@@ -406,10 +429,10 @@ export async function displayProjectsData(){
                                   '</svg>' 
             deleteImg.classList.add('deleteImg');
             deleteImg.classList.add('hide');
-            deleteImg.addEventListener('click', function(event){
+            deleteImg.addEventListener('click', async function(event){
               const taskName = event.target.parentElement.parentElement.id.replace('Task-', '')
-              console.log(taskName)
               deleteTask(taskName)
+              displayProjectsData()
             })
             taskDiv.appendChild(deleteImg)
             projectTasksDiv.appendChild(taskDiv);
@@ -424,7 +447,7 @@ export async function displayProjectsData(){
   }
 
 }
-export async function chooseTaskData(){
+export async function getTaskDataToday(){
       const taskData = await getUserTasks();
       const filteredData = {};
       const year = new Date().getFullYear();
@@ -441,7 +464,7 @@ export async function chooseTaskData(){
 
 export async function displayTasksData(data, mode) {
   try {
-    const tasks = data || await chooseTaskData();
+    const tasks = data || await getUserTasks();
     const main_container = document.querySelector('.main');
     main_container.innerHTML = '';
     const mainDisplay = document.createElement('div');
@@ -486,7 +509,7 @@ export async function displayTasksData(data, mode) {
 
         if (document.getElementById('saveButton') === null){
           const saveButton = document.createElement('button');
-          const mode = mode || 'Today'
+          const mode = mode || 'Tasks'
           saveButton.textContent = 'SAVE';
           saveButton.addEventListener('click', function(event){
             if(mode != 'Projects'){
@@ -506,7 +529,6 @@ export async function displayTasksData(data, mode) {
         taskDueDate.addEventListener('click', function(){
           const datepickerParent = document.getElementById(`Task-${key}`);
           const datepickerMain = datepickerParent.querySelector('.datepicker-main')
-          console.log(datepickerMain)
           datepickerMain.addEventListener('click', function(event){
             if(event.target.classList.contains('datepicker-cell')){
               value['taskDueDate'] = taskDueDate.value
@@ -578,10 +600,12 @@ export async function displayTasksData(data, mode) {
                               '</svg>' 
         deleteImg.classList.add('deleteImg')
         deleteImg.classList.add('hide')
-        deleteImg.addEventListener('click', function(event){
+        deleteImg.addEventListener('click', async function(event){
           const taskName = event.target.parentElement.parentElement.parentElement.id.replace('Task-', '')
-          console.log(taskName)
+          const taskData = await getUserTasks();
           deleteTask(taskName)
+          displayTasksData(taskData, 'Tasks')
+          location.reload()
         })
         taskMain.appendChild(deleteImg)
         dataContainer.appendChild(taskDiv);
@@ -591,7 +615,7 @@ export async function displayTasksData(data, mode) {
 
     
 
-    createTopLevelButtons(mode || 'Today')
+    createTopLevelButtons(mode || 'Tasks')
 
     if (dataContainer.childElementCount == 0){
       const defaultDiv = document.createElement('div');
@@ -602,7 +626,7 @@ export async function displayTasksData(data, mode) {
       defaultImg.src = defaultImgSrc;
       defaultImg.style.width = '294px';
       const defaultP = document.createElement('p');
-      defaultP.innerHTML = 'What do you have to do today?</br> Tasks added here will be automatically marked as due today'
+      defaultP.innerHTML = 'What do you have to do today?</br>'
       defaultP.style.marginLeft = '5%'
       defaultDiv.appendChild(defaultImg);
       defaultDiv.appendChild(defaultP);
