@@ -1,5 +1,5 @@
 import { handleUserCreation, handleLoginFormSubmit } from "../../backend/sendUserData";
-import { getUserTasks, logoutUser, remove_project } from "./misc";
+import { displayProjectsData, getUserTasks, logoutUser, remove_project } from "./misc";
 import { addTask } from "./misc";
 import { displayTasksData } from "./misc";
 import { addProject } from "./misc";
@@ -210,7 +210,7 @@ export async function updateDisplayForUser(username){
     const testButton = document.createElement('button');
     testButton.id = 'testButton';
     testButton.textContent = 'TEST'
-    testButton.addEventListener('click', () => remove_project('asdasdasd'))
+    testButton.addEventListener('click', () => remove_project('czxczxzxc'))
     sidebar.appendChild(testButton);
     
     
@@ -374,7 +374,8 @@ export function setProjectDialog(tasks){
     const projectData = {'name' : projectName, 'tasks' : taskSelection};
     addProject(projectData)
     projectDialog.remove();
-    // location.reload();
+
+    setTimeout(() => displayProjectsData(), 100)
     });
     
     return projectDialog

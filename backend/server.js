@@ -20,6 +20,7 @@ const pool = mysql.createPool({
 
 const crypto = require('crypto');
 const { connect } = require('http2');
+const { Console } = require('console');
 const sessionSecret = crypto.randomBytes(32).toString('hex');
 app.use(session({
     secret: sessionSecret,
@@ -54,13 +55,58 @@ app.post('/createUser', async (req, res) => {
   }
 });
 
-app.get('/getProjects', async function(req,res) {
+async function removeProject(username, projectName) {
+  const connection = await pool.getConnection();
+  const getProjectQuery = 'SELECT projects FROM users WHERE username = ?';
+  const [projectData] = await connection.execute(getProjectQuery, [username]);
+  const currentProjects = projectData[0]['projects'];
+  delete currentProjects[projectName];
+  try {
+    const addProjectQuery = 'UPDATE users SET projects = ? WHERE username = ?';
+    await connection.execute(addProjectQuery, [currentProjects, username]);
+  } catch (error) {
+    console.log(`Error deleting project ${error}`);
+  } finally {
+    connection.release();
+    return currentProjects
+  }
+}
+
+
+app.post('/remove_project', async (req, res, next) => {
+  const username = req.session.username;
+  const { projectName } = req.body;
+  try {
+    await removeProject(username, projectName);
+    res.sendStatus(200); // Send success status
+  } catch (error) {
+    console.error('Error removing project:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.get('/getProjects', async function(req, res) {
   try {
     const username = req.session.username;
     const connection = await pool.getConnection();
     const getUserQuery = 'SELECT projects FROM users WHERE username = ?';
     const [userData] = await connection.execute(getUserQuery, [username]);
-    const currentProjects= userData[0].projects;
+    let currentProjects = userData[0].projects;
+    const getTasksQuery = 'SELECT tasks FROM users WHERE username = ?';
+    const [tasksData] = await connection.execute(getTasksQuery, [username]);
+    const currentTasksJson = tasksData[0].tasks || JSON.stringify({});
+    const currentTasks = JSON.parse(currentTasksJson);
+
+    for (const project in currentProjects) {
+      for (const task of currentProjects[project]) {
+        console.log(task)
+        console.log(task in currentTasks)
+        if (!(task in currentTasks)) {
+          currentProjects = await removeProject(username, project);
+        }
+      }
+    }
     res.json(currentProjects);
     connection.release();
   } catch (error) {
@@ -190,27 +236,7 @@ app.post('/addTask', async (req, res, next) => {
   }
 })
 
-app.post('/remove_project', async (req,res,next) => {
-  const username = req.session.username
-  const connection = await pool.getConnection()
-  const { projectName } = req.body
-  console.log(projectName)
-  const getProjectQuery = 'SELECT projects FROM users WHERE username = ?'
-  const [projectData] = await connection.execute(getProjectQuery, [username]);
-  const currentProjects = projectData[0]['projects'];
-  delete currentProjects[projectName]
-  console.log(currentProjects)
-  try{
-    const addProjectQuery = 'UPDATE users SET projects = ? WHERE username = ?'
-    await connection.execute(addProjectQuery, [currentProjects, username])
-    }catch (error){
-      console.log(`Error deleting project ${error}`)
-    }
-    finally{
-      connection.release()
-      next()
-  }
-})
+
 
 
 app.post('/remove_task', async (req, res, next) => {
@@ -218,14 +244,13 @@ app.post('/remove_task', async (req, res, next) => {
   const connection = await pool.getConnection();
 
   const { taskName }= req.body;
-  
+  console.log(taskName)
 
   const getUserQuery = 'SELECT tasks FROM users WHERE username = ?';
   const [userData] = await connection.execute(getUserQuery, [username]);
   const currentTasksJson = userData[0].tasks;
   const currentTasks = JSON.parse(currentTasksJson);
   delete currentTasks[taskName]
-  console.log(currentTasks)
 
   try{
     const updateQuery = 'UPDATE users SET tasks = ? WHERE username = ?';

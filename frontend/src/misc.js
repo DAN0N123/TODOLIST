@@ -299,8 +299,42 @@ export async function displayProjectsData(){
         projectName.setAttribute('data-bs-target', `#projectTasks${projectKey}`)
         projectName.ariaExpanded = "false";
         projectName.textContent = project;
+        const deleteImg = document.createElement('button');
+        deleteImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#E42328" class="bi bi-trash3-fill" viewBox="0 0 16 16">'+
+                              '<path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>'+
+                              '</svg>' 
+        deleteImg.classList.add('deleteImg');
+        deleteImg.classList.add('hide');
+        deleteImg.setAttribute('data-bs-toggle', 'modal')
+        deleteImg.setAttribute('data-bs-target', '#confirmModal')
+        deleteImg.addEventListener('click', function(event){
+            
+            const deleteButton = document.getElementById('deleteButton');
+            
+            deleteButton.onclick = function(){
+            remove_project(`${projectKey}`)
+            const modal = deleteButton.parentElement.parentElement.parentElement.parentElement
+            
+
+            // reset and hide modal
+            const body = document.querySelector('body')
+            const modalBackdrop = document.querySelector('.modal-backdrop')
+            modalBackdrop.remove()
+            body.classList.remove('modal-open')
+            body.removeAttribute('style')
+            modal.classList.remove('show')
+            modal.removeAttribute('style')
+            modal.removeAttribute('aria-modal')
+            modal.setAttribute('aria-hidden', 'true')
+            modal.removeAttribute('role')
+            setTimeout( () => displayProjectsData(), 100)
+            };
+        });
+
+       
         outerP.innerHTML = '<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample"></button>'
         outerP.appendChild(projectName);
+        outerP.appendChild(deleteImg);
         projectDiv.appendChild(outerP);
         projectDiv.appendChild(projectTasksOuterDiv);
         const dataContainer = document.querySelector('.dataContainer')
@@ -350,17 +384,6 @@ export async function displayProjectsData(){
             taskDueDate.type = 'text'
             taskDueDate.value = value['taskDueDate'];
     
-            // function saveTaskUpdates(button, tasks){
-            //   button.classList.add('hide')
-            //   const currentTasks = tasks;
-            //   fetch('/saveTaskUpdates', {
-            //     method: 'POST',
-            //     headers: {
-            //       'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(currentTasks),
-            //   })
-            // }
     
             function pickImage(value){
               return value['isCompleted'] ? ('data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="22" fill="#327FE9" class="bi bi-check-circle-fill" viewBox="0 0 16 16">' +
@@ -423,18 +446,26 @@ export async function displayProjectsData(){
             taskDiv.id = `Task-${key}`;
             taskDiv.appendChild(outerP);
             taskDiv.appendChild(taskDescriptionOuterDiv);
-            const deleteImg = document.createElement('div');
+            const deleteImg = document.createElement('button');
             deleteImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#E42328" class="bi bi-trash3-fill" viewBox="0 0 16 16">'+
                                   '<path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>'+
                                   '</svg>' 
             deleteImg.classList.add('deleteImg');
             deleteImg.classList.add('hide');
-            deleteImg.addEventListener('click', async function(event){
-              const taskName = event.target.parentElement.parentElement.id.replace('Task-', '')
-              deleteTask(taskName)
-              displayProjectsData()
-            })
-            taskDiv.appendChild(deleteImg)
+            deleteImg.type = 'button'
+            deleteImg.setAttribute('data-bs-toggle', 'modal')
+            deleteImg.setAttribute('data-bs-target', '#confirmModal')
+            deleteImg.addEventListener('click', function(event){
+                const deleteButton = document.getElementById('deleteButton');
+                const taskName = event.target.parentElement.parentElement.parentElement.parentElement.id.replace('Task-', '')
+                deleteButton.onclick = async function(){
+                const taskData = await getUserTasks();
+                deleteTask(taskName)
+                // displayTasksData(taskData, 'Tasks')
+                // location.reload()
+                };
+            });
+            taskCompletionImgDiv.appendChild(deleteImg)
             projectTasksDiv.appendChild(taskDiv);
           }
         }
@@ -594,19 +625,25 @@ export async function displayTasksData(data, mode) {
         taskDiv.id = `Task-${key}`;
         taskDiv.appendChild(outerP);
         taskDiv.appendChild(taskDescriptionOuterDiv);
-        const deleteImg = document.createElement('div');
+        const deleteImg = document.createElement('button');
         deleteImg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#E42328" class="bi bi-trash3-fill" viewBox="0 0 16 16">'+
                               '<path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>'+
                               '</svg>' 
         deleteImg.classList.add('deleteImg')
         deleteImg.classList.add('hide')
-        deleteImg.addEventListener('click', async function(event){
-          const taskName = event.target.parentElement.parentElement.parentElement.id.replace('Task-', '')
-          const taskData = await getUserTasks();
-          deleteTask(taskName)
-          displayTasksData(taskData, 'Tasks')
-          location.reload()
-        })
+        deleteImg.type = 'button'
+        deleteImg.setAttribute('data-bs-toggle', 'modal')
+        deleteImg.setAttribute('data-bs-target', '#confirmModal')
+        deleteImg.addEventListener('click', function(event){
+            const deleteButton = document.getElementById('deleteButton');
+            const taskName = event.target.parentElement.parentElement.parentElement.id.replace('Task-', '')
+            deleteButton.onclick = async function(){
+            const taskData = await getUserTasks();
+            deleteTask(taskName)
+            displayTasksData(taskData, 'Tasks')
+            location.reload()
+            };
+        });
         taskMain.appendChild(deleteImg)
         dataContainer.appendChild(taskDiv);
       }
